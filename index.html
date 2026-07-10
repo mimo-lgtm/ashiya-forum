@@ -21,10 +21,16 @@
 
     <div class="container my-4">
         <ul class="nav nav-tabs mb-4 justify-content-center" id="myTab" role="tablist">
-            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#wall-tab">✨ AIと壁打ち</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#map-tab">🗺️ アイデアの地図</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#list-tab">📥 提案箱</button></li>
-        </ul>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="wall-tab-btn" data-bs-toggle="tab" data-bs-target="#wall-tab-pane" type="button">✨ 1. AIと壁打ち</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="map-tab-btn" data-bs-toggle="tab" data-bs-target="#map-tab-pane" type="button">🗺️ 2. アイデアの地図</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="list-tab-btn" data-bs-toggle="tab" data-bs-target="#list-tab-pane" type="button">📥 3. 提案箱</button>
+    </li>
+</ul>
 
         <div class="tab-content">
             <!-- タブ1: AI壁打ち -->
