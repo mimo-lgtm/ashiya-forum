@@ -1,47 +1,59 @@
 const GAS_URL = "https://script.google.com/macros/s/AKfycbzVCAYRzdj3VON7vhgk9RLz50ho0uPyMHfBu10FzPKX9ih_I500e8lFnqa1Z2bFF5LCbQ/exec";
 
-let allOpinions = [];
 let currentAiResult = null;
 
 document.addEventListener("DOMContentLoaded", function () {
-    const btnAiAnalysis = document.getElementById("btnAiAnalysis"); 
+    const btnAiAnalysis = document.getElementById("btnAiAnalysis");
     const btnSubmitToBox = document.getElementById("btnSubmitToBox");
-
-    fetchOpinions();
 
     if (btnAiAnalysis) {
         btnAiAnalysis.addEventListener("click", async function () {
-            const contentValue = document.getElementById("content").value.trim();
-            if (!contentValue) return alert("内容を入力してください。");
+            const content = document.getElementById("content").value.trim();
+            if (!content) return alert("内容を入力してください。");
 
-            const res = await fetch(GAS_URL, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ action: "analyze", content: contentValue })
-            });
-            const data = await res.json();
+            btnAiAnalysis.disabled = true;
+            btnAiAnalysis.innerHTML = "AI分析中...";
 
-            if (data.status === "success") {
-                currentAiResult = data.result;
-                document.getElementById("aiSummaryText").innerHTML = `<strong>【分類】</strong> ${currentAiResult["大分類"]} > ${currentAiResult["中分類"]}`;
-                document.getElementById("aiTitleText").textContent = currentAiResult["推奨タイトル"];
-                document.getElementById("aiAssistBox").classList.remove("d-none");
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain" },
+                    body: JSON.stringify({ action: "analyze", content: content })
+                });
+                const data = await res.json();
+
+                if (data.status === "success") {
+                    currentAiResult = data.result;
+                    document.getElementById("aiResult").innerHTML = `
+                        <h5>${currentAiResult["推奨タイトル"]}</h5>
+                        <p><strong>分類:</strong> ${currentAiResult["大分類"]} > ${currentAiResult["中分類"]}</p>
+                        <p>${currentAiResult["要約200"]}</p>
+                    `;
+                    document.getElementById("aiResult").classList.remove("d-none");
+                } else {
+                    alert("AI分析エラー: " + data.message);
+                }
+            } catch (err) {
+                alert("通信エラー");
+            } finally {
+                btnAiAnalysis.disabled = false;
+                btnAiAnalysis.innerHTML = "AIと壁打ちする";
             }
         });
     }
 
     if (btnSubmitToBox) {
         btnSubmitToBox.addEventListener("click", async function () {
-            if (!currentAiResult) return;
+            if (!currentAiResult) return alert("AI分析を先に行ってください。");
 
-            const rawText = document.getElementById("content").value.trim();
+            const content = document.getElementById("content").value.trim();
 
             const res = await fetch(GAS_URL, {
                 method: "POST",
                 headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify({
                     action: "submit",
-                    content: rawText,
+                    content: content,
                     title: currentAiResult["推奨タイトル"],
                     summary: currentAiResult["要約200"],
                     bigCatName: currentAiResult["大分類"] || "その他",
@@ -53,30 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.status === "success") {
                 alert("投稿完了！");
                 document.getElementById("content").value = "";
-                fetchOpinions();
             }
         });
     }
 });
-
-async function fetchOpinions() {
-    const res = await fetch(GAS_URL + "?action=get");
-    const data = await res.json();
-    allOpinions = Array.isArray(data) ? data : (data?.opinions || []);
-    renderStructuredIdeas(allOpinions);
-}
-
-function renderStructuredIdeas(ideasDataset) {
-    const container = document.getElementById("proposal-container");
-    if (!container) return;
-    container.innerHTML = "";
-
-    const categories = ["まちづくり", "子育て", "福祉", "環境", "行政"];
-
-    categories.forEach(cat => {
-        const section = document.createElement("div");
-        section.className = "mb-4";
-        section.innerHTML = `<h5>${cat}</h5>`;
-        container.appendChild(section);
-    });
-}
