@@ -1,4 +1,4 @@
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyPuJR6_B_QcpwVXwPat6YxQeQXukQhU57YbQ2eO5cyzqsafo0_ztkpcf0tG8_6ODnPsA/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbz7_nn1uo5pr58A0uUm1VvxxcC3uiLdiDllXJf72T4Yv8gvdcrtr5KTEVxK8t3I_UJACg/exec";
 
 let allOpinions = [];
 
