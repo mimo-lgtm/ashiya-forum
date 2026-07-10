@@ -239,3 +239,99 @@ body {
     .tree-container { height: auto; }
     .tree-overlay { position: relative; background: #334155; padding: 20px 10px; gap: 20px; }
 }
+
+/* proposal-tree.css */
+
+.tree-big{
+    margin-bottom:20px;
+    border:1px solid #dcdcdc;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.tree-big-title{
+    background:#2d6cdf;
+    color:#fff;
+    font-size:20px;
+    font-weight:bold;
+    padding:15px;
+    cursor:pointer;
+}
+
+.tree-big-body{
+    display:none;
+    padding:15px;
+    background:#f7f9fc;
+}
+
+.tree-mid{
+    margin:12px 0;
+    border:1px solid #ddd;
+    border-radius:8px;
+    overflow:hidden;
+}
+
+.tree-mid-title{
+    background:#eef3ff;
+    padding:12px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.tree-mid-body{
+    display:none;
+    padding:10px;
+}
+
+.tree-post{
+    margin:10px 0;
+    border-radius:8px;
+    border-left:6px solid #999;
+    overflow:hidden;
+}
+
+.tree-post-title{
+    padding:10px;
+    cursor:pointer;
+    font-weight:bold;
+    background:#fafafa;
+}
+
+.tree-post-body{
+    display:none;
+    background:#fff;
+    padding:15px;
+    line-height:1.8;
+}
+
+.single{
+    border-left-color:#2196F3;
+}
+
+.merged{
+    border-left-color:#FF9800;
+}
+
+.original{
+    border-left-color:#9E9E9E;
+    opacity:.8;
+}
+
+.proposal-summary{
+    white-space:pre-wrap;
+}
+
+.merge-info{
+    margin-top:15px;
+    padding:10px;
+    background:#fff4d8;
+    border-left:4px solid #ff9800;
+    font-size:14px;
+    border-radius:4px;
+}
+
+.tree-big-title:hover,
+.tree-mid-title:hover,
+.tree-post-title:hover{
+    opacity:.9;
+}
