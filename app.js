@@ -1,284 +1,535 @@
-// ==========================================
-// 1. 設定・定数・グローバル変数定義。
-// ==========================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzVCAYRzdj3VON7vhgk9RLz50ho0uPyMHfBu10FzPKX9ih_I500e8lFnqa1Z2bFF5LCbQ/exec";
-
-const MAIN_CATEGORIES = [
-    "まちづくり・都市計画",
-    "子育て・教育環境",
-    "福祉・健康・共生",
-    "環境・持続可能性",
-    "行政・市民参加・活力"
-];
-
-// 唯一の定義：名称ベースで管理
-const CATEGORY_STRUCTURE = {
-    "まちづくり・都市計画": ["住宅・まちなみ", "交通・移動手段", "公園・緑地・景観", "防災・レジリエンス", "その他"],
-    "子育て・教育環境": ["保育・教育施設", "子ども・若者の居場所", "学びの機会（生涯学習）", "家族支援", "その他"],
-    "福祉・健康・共生": ["高齢者支援", "障害者・多様な人々の支援", "健康づくり", "地域コミュニティ", "その他"],
-    "環境・持続可能性": ["気候変動対策", "資源循環・ごみ問題", "自然環境保全", "エネルギー・脱炭素", "その他"],
-    "行政・市民参加・活力": ["行政の透明性・効率化", "市民参加・協働", "文化・芸術・スポーツ", "産業・雇用・にぎわい", "その他"]
-};
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyPuJR6_B_QcpwVXwPat6YxQeQXukQhU57YbQ2eO5cyzqsafo0_ztkpcf0tG8_6ODnPsA/exec";
 
 let allOpinions = [];
-let currentAiResult = null;
 
-// ==========================================
-// 2. メイン処理（画面初期化・イベント設定）
-// ==========================================
-document.addEventListener("DOMContentLoaded", function () {
-    const btnAiAnalysis = document.getElementById("btnAiAnalysis");
-    const btnSubmitToBox = document.getElementById("btnSubmitToBox");
-    const aiPlaceholder = document.getElementById("aiPlaceholder");
-    const aiAssistBox = document.getElementById("aiAssistBox");
-    const aiSummaryText = document.getElementById("aiSummaryText");
-    const aiPerspectivesText = document.getElementById("aiPerspectivesText");
-    const aiTitleText = document.getElementById("aiTitleText");
-    const aiRefinedText = document.getElementById("aiRefinedText");
+document.addEventListener("DOMContentLoaded", () => {
 
     fetchOpinions();
 
-    // AI分析ボタン
+    const btnAiAnalysis = document.getElementById("btnAiAnalysis");
+    const btnSubmitToBox = document.getElementById("btnSubmitToBox");
+
     if (btnAiAnalysis) {
-        btnAiAnalysis.addEventListener("click", async function () {
-            const txtContent = document.getElementById("content");
-            const contentValue = txtContent ? txtContent.value.trim() : "";
-
-            if (!contentValue) {
-                alert("あなたの想いやアイデアを自由に入力してください。");
-                return;
-            }
-
-            btnAiAnalysis.disabled = true;
-            btnAiAnalysis.innerHTML = `<span class="spinner-border spinner-border-sm"></span> AIが思考を整理中...`;
-
-            try {
-                const res = await fetch(GAS_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify({ action: "analyze", content: contentValue })
-                });
-                const data = await res.json();
-
-                if (data.status === "success") {
-                    currentAiResult = data.result;
-
-                    const bigCat = currentAiResult["大分類"] || "その他";
-                    const midCat = currentAiResult["中分類"] || "その他";
-
-                    aiSummaryText.innerHTML = `<strong>【自動分類】</strong> ${bigCat} ＞ ${midCat}`;
-
-                    aiPerspectivesText.innerHTML = `
-<div class="mb-3"><strong>a. 核心</strong><br>${currentAiResult["核心"] || "分析中"}</div>
-<div class="mb-3"><strong>b. 変化</strong><br>${currentAiResult["変化"] || "分析中"}</div>
-<div class="mb-3"><strong>c. 成功事例</strong><br>${currentAiResult["成功事例"] || "分析中"}</div>
-<div class="mb-3"><strong>d. 懸念点</strong><br>${currentAiResult["懸念点"] || "分析中"}</div>
-<div class="mb-1"><strong>e. 問い</strong><br>${currentAiResult["問い"] || "分析中"}</div>
-                    `.trim();
-
-                    aiTitleText.textContent = currentAiResult["推奨タイトル"] || "無題の提案";
-                    aiRefinedText.textContent = currentAiResult["要約200"] || "";
-
-                    aiPlaceholder.style.setProperty("display", "none", "important");
-                    aiAssistBox.style.setProperty("display", "flex", "important");
-                    aiAssistBox.classList.remove("d-none");
-                } else {
-                    alert("AI分析エラー: " + data.message);
-                }
-            } catch (err) {
-                console.error(err);
-                alert("通信エラーが発生しました。");
-            } finally {
-                btnAiAnalysis.disabled = false;
-                btnAiAnalysis.innerHTML = `✨ 1. 意見を送信してAIと壁打ちする`;
-            }
-        });
+        btnAiAnalysis.addEventListener("click", aiAnalysis);
     }
 
-    // 投稿ボタン
     if (btnSubmitToBox) {
-        btnSubmitToBox.addEventListener("click", async function () {
-            if (!currentAiResult) return;
-
-            const bigCat = currentAiResult["大分類"] || "その他";
-            const midCat = currentAiResult["中分類"] || "その他";
-
-            const message = `正式に提案箱へ投稿しますか？\n(大分類「${bigCat}」 > 中分類「${midCat}」へ格納されます)`;
-            if (!confirm(message)) return;
-
-            const txtContent = document.getElementById("content");
-            const rawText = txtContent ? txtContent.value.trim() : "";
-
-            btnSubmitToBox.disabled = true;
-            btnSubmitToBox.innerHTML = `<span class="spinner-border spinner-border-sm"></span> 投稿中...`;
-
-            try {
-                const res = await fetch(GAS_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify({
-                        action: "submit",
-                        content: rawText,
-                        title: currentAiResult["推奨タイトル"] || "無題の提案",
-                        summary: currentAiResult["要約200"] || "",
-                        bigCatName: bigCat,
-                        midCatName: midCat,
-                        aiResult: currentAiResult
-                    })
-                });
-                const data = await res.json();
-
-                if (data.status === "success") {
-                    alert(`📥 投稿が完了しました！`);
-
-                    txtContent.value = "";
-                    aiAssistBox.classList.add("d-none");
-                    aiPlaceholder.style.removeProperty("display");
-                    currentAiResult = null;
-
-                    await fetchOpinions();
-
-                    const listTabBtn = document.getElementById("list-tab-btn");
-                    if (listTabBtn) listTabBtn.click();
-                } else {
-                    alert("投稿エラー: " + (data.message || "不明なエラー"));
-                    btnSubmitToBox.disabled = false;
-                }
-            } catch (err) {
-                console.error(err);
-                alert("送信エラーが発生しました。");
-                btnSubmitToBox.disabled = false;
-            }
-        });
+        btnSubmitToBox.addEventListener("click", submitOpinion);
     }
-});
 
-// ==========================================
-// 3. データ取得
-// ==========================================
-async function fetchOpinions() {
+});
+async function aiAnalysis() {
+
+    const content = document.getElementById("content").value.trim();
+
+    if (!content) {
+        alert("内容を入力してください。");
+        return;
+    }
+
     try {
-        const res = await fetch(GAS_URL + "?action=get");
+
+        const res = await fetch(GAS_URL, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+                action: "analyze",
+
+                content: content
+
+            })
+
+        });
+
         const data = await res.json();
 
         if (data.status !== "success") {
-            console.error(data.message);
+            alert(data.message);
             return;
         }
 
-        allOpinions = data.opinions || [];
-        renderStructuredIdeas(allOpinions);
+        const r = data.result;
 
-    } catch (e) {
-        console.error(e);
+        document.getElementById("title").value = r["推奨タイトル"] || "";
+
+        document.getElementById("summary").value = r["要約200"] || "";
+
+        document.getElementById("bigCatName").value = r.bigCatName || "";
+
+        document.getElementById("midCatName").value = r.midCatName || "";
+
+        document.getElementById("aiResult").innerHTML = `
+
+<b>核心</b><br>
+${r["核心"]}<br><br>
+
+<b>期待される変化</b><br>
+${r["変化"]}<br><br>
+
+<b>成功事例</b><br>
+${r["成功事例"]}<br><br>
+
+<b>懸念点</b><br>
+${r["懸念点"]}<br><br>
+
+<b>AIからの問い</b><br>
+${r["問い"]}
+
+`;
+
     }
+
+    catch(err){
+
+        console.error(err);
+
+        alert("AI通信エラー");
+
+    }
+
 }
 
-// ==========================================
-// 4. 描画ロジック
-// ==========================================
-function renderStructuredIdeas(opinions) {
+async function submitOpinion() {
+
+    const title = document.getElementById("title").value.trim();
+
+    const summary = document.getElementById("summary").value.trim();
+
+    const content = document.getElementById("content").value.trim();
+
+    const bigCatName = document.getElementById("bigCatName").value.trim();
+
+    const midCatName = document.getElementById("midCatName").value.trim();
+
+    const author = document.getElementById("author")
+        ? document.getElementById("author").value.trim()
+        : "";
+
+    if (!title || !summary || !content) {
+
+        alert("入力不足です");
+
+        return;
+
+    }
+
+    try {
+
+        const res = await fetch(GAS_URL, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+                action: "submit",
+
+                title,
+
+                summary,
+
+                content,
+
+                bigCatName,
+
+                midCatName,
+
+                author
+
+            })
+
+        });
+
+        const data = await res.json();
+
+        if (data.status == "success") {
+
+            await fetchOpinions();
+
+            alert("提案を登録しました");
+
+        } else {
+
+            alert(data.message);
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("通信エラー");
+
+    }
+
+}
+
+async function fetchOpinions() {
+
+    try {
+
+        const res = await fetch(
+            GAS_URL + "?action=get"
+        );
+
+        const data = await res.json();
+
+        if (data.status !== "success") {
+
+            console.error(data.message);
+
+            return;
+
+        }
+
+        allOpinions = data.opinions || [];
+
+        renderProposalTree(allOpinions);
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+    }
+
+}
+
+function renderProposalTree(opinions) {
 
     const container = document.getElementById("proposal-container");
+
+    if (!container) return;
+
+    const tree = {};
+
+    opinions.forEach(op => {
+
+        const big = op.bigCatName || "その他";
+        const mid = op.midCatName || "その他";
+
+        if (!tree[big]) tree[big] = {};
+
+        if (!tree[big][mid]) tree[big][mid] = [];
+
+        tree[big][mid].push(op);
+
+    });
+
+    let html = "";
+
+    Object.keys(tree).forEach(big => {
+
+        html += `
+<div class="tree-big">
+
+<div class="tree-big-title"
+onclick="toggleTree(this)">
+▶ ${big}
+</div>
+
+<div class="tree-big-body">
+`;
+
+        Object.keys(tree[big]).forEach(mid => {
+
+            html += `
+<div class="tree-mid">
+
+<div class="tree-mid-title"
+onclick="toggleTree(this)">
+▶ ${mid}
+</div>
+
+<div class="tree-mid-body">
+`;
+
+            tree[big][mid].forEach(post => {
+
+                html += `
+<div class="tree-post">
+
+<div class="tree-post-title"
+onclick="toggleTree(this)">
+📝 ${post.title}
+</div>
+
+<div class="tree-post-body">
+
+${post.summary}
+
+</div>
+
+</div>
+`;
+
+            });
+
+            html += `
+</div>
+
+</div>
+`;
+
+        });
+
+        html += `
+</div>
+
+</div>
+`;
+
+    });
+
+    container.innerHTML = html;
+
+}
+
+function toggleTree(element) {
+
+    const body = element.nextElementSibling;
+
+    if (!body) return;
+
+    if (body.style.display === "block") {
+
+        body.style.display = "none";
+
+        element.innerHTML = element.innerHTML.replace("▼", "▶");
+
+    } else {
+
+        body.style.display = "block";
+
+        element.innerHTML = element.innerHTML.replace("▶", "▼");
+
+    }
+
+}
+
+function clearForm() {
+
+    const ids = [
+
+        "title",
+
+        "summary",
+
+        "content",
+
+        "bigCatName",
+
+        "midCatName",
+
+        "author"
+
+    ];
+
+    ids.forEach(id => {
+
+        const el = document.getElementById(id);
+
+        if (el) el.value = "";
+
+    });
+
+    const aiResult = document.getElementById("aiResult");
+
+    if (aiResult) {
+
+        aiResult.innerHTML = "";
+
+    }
+
+}
+
+function escapeHtml(text) {
+
+    if (!text) return "";
+
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+// proposal-tree.js
+
+function renderProposalTree(opinions) {
+
+    const container = document.getElementById("proposal-container");
+
     if (!container) return;
 
     container.innerHTML = "";
 
-    // 固定ツリー
-    const CATEGORY = {
-        "まちづくり・都市計画（住みやすさの基盤）": ["住宅・まちなみ", "交通・移動手段", "公園・緑地・景観", "防災・レジリエンス", "その他"],
-        "子育て・教育環境（次世代を育てるまち）": ["保育・教育施設", "子ども・若者の居場所", "学びの機会（生涯学習）", "家族支援", "その他"],
-        "福祉・健康・共生（誰も取り残さないまち）": ["高齢者支援", "障害者・多様な人々の支援", "健康づくり", "地域コミュニティ", "その他"],
-        "環境・持続可能性（未来に繋ぐ芦屋）": ["気候変動対策", "資源循環・ごみ問題", "自然環境保全", "エネルギー・脱炭素", "その他"],
-        "行政・市民参加・活力（より良い市政へ）": ["行政の透明性・効率化", "市民参加・協働", "文化・芸術・スポーツ", "産業・雇用・にぎわい", "その他"]
-    };
+    const MASTER = {
 
-    // AI名称 → 固定ツリー名称変換
-    const BIGMAP = {
-        "まちづくり・都市計画": "まちづくり・都市計画（住みやすさの基盤）",
-        "子育て・教育環境": "子育て・教育環境（次世代を育てるまち）",
-        "福祉・健康・共生": "福祉・健康・共生（誰も取り残さないまち）",
-        "環境・持続可能性": "環境・持続可能性（未来に繋ぐ芦屋）",
-        "行政・市民参加・活力": "行政・市民参加・活力（より良い市政へ）"
+        "教育・子育て": [
+            "学校教育",
+            "幼児教育",
+            "家庭・子育て支援",
+            "その他"
+        ],
+
+        "福祉・健康": [
+            "高齢者福祉",
+            "障がい福祉",
+            "健康づくり",
+            "その他"
+        ],
+
+        "防災・安全": [
+            "防災",
+            "防犯",
+            "交通安全",
+            "その他"
+        ],
+
+        "環境・都市": [
+            "公園・緑",
+            "道路・交通",
+            "景観・まちづくり",
+            "その他"
+        ],
+
+        "地域・行政": [
+            "地域コミュニティ",
+            "行政サービス",
+            "市民参加",
+            "その他"
+        ]
+
     };
 
     let html = "";
-    let bigIndex = 0;
 
-    Object.keys(CATEGORY).forEach(big => {
+    Object.keys(MASTER).forEach((big, b) => {
 
         html += `
-<div class="accordion mb-3">
-<div class="accordion-item">
-<h2 class="accordion-header">
-<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#big${bigIndex}">
-🌳 ${big}
-</button>
-</h2>
-<div id="big${bigIndex}" class="accordion-collapse collapse">
-<div class="accordion-body">
+<div class="tree-big">
+
+<div class="tree-big-title"
+onclick="toggleTree(this)">
+▶ ${big}
+</div>
+
+<div class="tree-big-body">
 `;
 
-        let midIndex = 0;
-
-        CATEGORY[big].forEach(mid => {
+        MASTER[big].forEach((mid, m) => {
 
             html += `
-<div class="accordion mb-2">
-<div class="accordion-item">
-<h2 class="accordion-header">
-<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mid${bigIndex}_${midIndex}">
-📂 ${mid}
-</button>
-</h2>
-<div id="mid${bigIndex}_${midIndex}" class="accordion-collapse collapse">
-<div class="accordion-body">
+<div class="tree-mid">
+
+<div class="tree-mid-title"
+onclick="toggleTree(this)">
+▶ ${mid}
+</div>
+
+<div class="tree-mid-body">
 `;
 
             opinions
-                .filter(op => {
-                    const bigName = BIGMAP[op.bigCatName] || op.bigCatName;
-                    return bigName === big && op.midCatName === mid;
-                })
+                .filter(o =>
+                    o.bigCatName == big &&
+                    o.midCatName == mid
+                )
                 .forEach((post, p) => {
 
+                    let icon = "📝";
+                    let cls = "single";
+
+                    if (post.status == "新統合") {
+
+                        icon = "⭐";
+                        cls = "merged";
+
+                    }
+
+                    if (post.status == "元記事") {
+
+                        icon = "📄";
+                        cls = "original";
+
+                    }
+
                     html += `
-<div class="accordion mb-2">
-<div class="accordion-item">
-<h2 class="accordion-header">
-<button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#post${bigIndex}_${midIndex}_${p}">
-📝 ${post.title}
-</button>
-</h2>
-<div id="post${bigIndex}_${midIndex}_${p}" class="accordion-collapse collapse">
-<div class="accordion-body">
+<div class="tree-post ${cls}">
+
+<div class="tree-post-title"
+onclick="toggleTree(this)">
+${icon} ${post.title}
+</div>
+
+<div class="tree-post-body">
+
+<div class="proposal-summary">
+
 ${post.summary}
+
 </div>
-</div>
-</div>
-</div>
+
 `;
+
+                    if (post.status == "元記事") {
+
+                        html += `
+
+<div class="merge-info">
+
+統合先：${post.mergeTitle}
+
+</div>
+
+`;
+
+                    }
+
+                    html += `
+
+</div>
+
+</div>
+
+`;
+
                 });
 
             html += `
+
 </div>
+
 </div>
-</div>
-</div>
+
 `;
 
-            midIndex++;
         });
 
         html += `
+
 </div>
+
 </div>
-</div>
-</div>
+
 `;
 
-        bigIndex++;
     });
 
     container.innerHTML = html;
+
 }
+
