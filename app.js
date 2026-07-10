@@ -33,11 +33,7 @@ async function aiAnalysis() {
 
             method: "POST",
 
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
+           body: JSON.stringify({
 
                 action: "analyze",
 
@@ -124,10 +120,6 @@ async function submitOpinion() {
         const res = await fetch(GAS_URL, {
 
             method: "POST",
-
-            headers: {
-                "Content-Type": "application/json"
-            },
 
             body: JSON.stringify({
 
