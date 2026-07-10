@@ -1,0 +1,78 @@
+/* style.css */
+body {
+    background-color: #f8fafc;
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+    line-height: 1.6;
+}
+
+h1, h2, h3, h5 {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.nav-tabs .nav-link {
+    font-weight: 600;
+    color: #374151;
+}
+
+.nav-tabs .nav-link.active {
+    color: #1e40af;
+    border-bottom: 3px solid #1e40af;
+}
+
+/* ヘッダー画像 */
+header img {
+    filter: brightness(0.85);
+}
+
+/* カード */
+.card {
+    transition: all 0.2s ease;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+/* 提案箱 */
+#proposal-container .card {
+    border-left: 5px solid #1e40af;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+
+/* アコーディオン */
+details {
+    cursor: pointer;
+}
+
+details summary {
+    list-style: none;
+}
+
+details summary::-webkit-details-marker {
+    display: none;
+}
+
+/* ボタン */
+.btn-primary {
+    background-color: #1e40af;
+    border-color: #1e40af;
+}
+
+.btn-success {
+    background-color: #166534;
+    border-color: #166534;
+}
+
+/* レスポンシブ調整 */
+@media (max-width: 768px) {
+    h1.display-5 {
+        font-size: 1.8rem;
+    }
+}

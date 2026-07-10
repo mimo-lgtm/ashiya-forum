@@ -8,17 +8,32 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- ヘッダー画像など -->
+
+    <!-- ヘッダー -->
+    <div class="w-100 overflow-hidden shadow-sm mb-4" style="max-height: 380px; position: relative; background-color: #1e3a8a;">
+        <img src="image/ashiya.jpg" class="img-fluid w-100" style="height: 380px; object-fit: cover;" alt="芦屋">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(30,58,138,0.7));"></div>
+        <div style="position: absolute; bottom: 40px; left: 5%; color: white;">
+            <h1 class="fw-bold display-5">芦屋の明日を共に考える</h1>
+            <p class="lead">市民の声でつくる、芦屋の未来</p>
+        </div>
+    </div>
+
     <div class="container my-4">
-        <ul class="nav nav-tabs mb-4">
-            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#wall-tab">AIと壁打ち</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#map-tab">アイデアの地図</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#list-tab">提案箱</button></li>
+        <ul class="nav nav-tabs mb-4 justify-content-center" id="myTab" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#wall-tab">✨ AIと壁打ち</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#map-tab">🗺️ アイデアの地図</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#list-tab">📥 提案箱</button></li>
         </ul>
 
         <div class="tab-content">
-            <!-- タブ1,2,3の内容 -->
-            <div id="list-tab" class="tab-pane">
+            <!-- タブ1: AI壁打ち -->
+            <div class="tab-pane fade show active" id="wall-tab">
+                <!-- 以前の壁打ちUIをここに -->
+            </div>
+
+            <!-- タブ3: 提案箱 -->
+            <div class="tab-pane fade" id="list-tab">
                 <div id="proposal-container"></div>
             </div>
         </div>
