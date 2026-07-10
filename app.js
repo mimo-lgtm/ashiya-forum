@@ -1,7 +1,7 @@
 // ==========================================
 // 1. 設定・定数・グローバル変数定義。
 // ==========================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbz_kVbBkm2vye9FRcSOTzvYHNLFTVesZp45x7By_hFrLcJJLgPDieuoXlU7IlYpcehm/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzVCAYRzdj3VON7vhgk9RLz50ho0uPyMHfBu10FzPKX9ih_I500e8lFnqa1Z2bFF5LCbQ/exec";
 
 const MAIN_CATEGORIES = [
     "まちづくり・都市計画",
