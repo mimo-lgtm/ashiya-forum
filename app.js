@@ -14,9 +14,9 @@ const MAIN_CATEGORIES = [
 // 唯一の定義：名称ベースで管理
 const CATEGORY_STRUCTURE = {
     "まちづくり・都市計画": ["住宅・まちなみ", "交通・移動手段", "公園・緑地・景観", "防災・レジリエンス", "その他"],
-    "子育て・教育環境":  ["保育・教育施設", "子ども・若者の居場所", "学びの機会（生涯学習）", "家族支援", "その他"],
+    "子育て・教育環境": ["保育・教育施設", "子ども・若者の居場所", "学びの機会（生涯学習）", "家族支援", "その他"],
     "福祉・健康・共生": ["高齢者支援", "障害者・多様な人々の支援", "健康づくり", "地域コミュニティ", "その他"],
-    "エネルギー・脱炭素": ["気候変動対策", "資源循環・ごみ問題", "自然環境保全", "エネルギー・脱炭素", "その他"],
+    "環境・持続可能性": ["気候変動対策", "資源循環・ごみ問題", "自然環境保全", "エネルギー・脱炭素", "その他"],
     "行政・市民参加・活力": ["行政の透明性・効率化", "市民参加・協働", "文化・芸術・スポーツ", "産業・雇用・にぎわい", "その他"]
 };
 
@@ -27,7 +27,7 @@ let currentAiResult = null;
 // 2. メイン処理（画面初期化・イベント設定）
 // ==========================================
 document.addEventListener("DOMContentLoaded", function () {
-    const btnAiAnalysis = document.getElementById("btnAiAnalysis"); 
+    const btnAiAnalysis = document.getElementById("btnAiAnalysis");
     const btnSubmitToBox = document.getElementById("btnSubmitToBox");
     const aiPlaceholder = document.getElementById("aiPlaceholder");
     const aiAssistBox = document.getElementById("aiAssistBox");
@@ -36,10 +36,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const aiTitleText = document.getElementById("aiTitleText");
     const aiRefinedText = document.getElementById("aiRefinedText");
 
-    // ✨ 最優先でデータを読み込む
     fetchOpinions();
 
-    // 📄 AI分析（壁打ち）ボタンのイベント
+    // AI分析ボタン
     if (btnAiAnalysis) {
         btnAiAnalysis.addEventListener("click", async function () {
             const txtContent = document.getElementById("content");
@@ -51,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             btnAiAnalysis.disabled = true;
-            btnAiAnalysis.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> AIが思考を整理中...`;
+            btnAiAnalysis.innerHTML = `<span class="spinner-border spinner-border-sm"></span> AIが思考を整理中...`;
 
             try {
                 const res = await fetch(GAS_URL, {
@@ -60,32 +59,29 @@ document.addEventListener("DOMContentLoaded", function () {
                     body: JSON.stringify({ action: "analyze", content: contentValue })
                 });
                 const data = await res.json();
-　　　　　　　　
+
                 if (data.status === "success") {
                     currentAiResult = data.result;
+
                     const bigCat = currentAiResult["大分類"] || "その他";
                     const midCat = currentAiResult["中分類"] || "その他";
 
-                    if (aiSummaryText) aiSummaryText.innerHTML = `<strong>【自動分類】</strong> ${bigCat} ＞ ${midCat}`;
+                    aiSummaryText.innerHTML = `<strong>【自動分類】</strong> ${bigCat} ＞ ${midCat}`;
 
-                    if (aiPerspectivesText) {
-                        aiPerspectivesText.innerHTML = `
-<div class="mb-3"><strong>a. この意見の核心（本当の願い・課題）</strong><br><span class="text-dark">${currentAiResult["核心"] || "分析中"}</span></div>
-<div class="mb-3"><strong>b. 実現した場合の市民生活への変化</strong><br><span class="text-dark">${currentAiResult["変化"] || "分析中"}</span></div>
-<div class="mb-3"><strong>c. 成功事例（国内外）</strong><br><span class="text-dark">${currentAiResult["成功事例"] || "分析中"}</span></div>
-<div class="mb-3"><strong>d. 懸念点と乗り越え方</strong><br><span class="text-dark">${currentAiResult["懸念点"] || "分析中"}</span></div>
-<div class="mb-1"><strong>e. さらに発展させるための問い</strong><br><span class="text-dark">${currentAiResult["問い"] || "分析中"}</span></div>
-                        `.trim();
-                    }
+                    aiPerspectivesText.innerHTML = `
+<div class="mb-3"><strong>a. 核心</strong><br>${currentAiResult["核心"] || "分析中"}</div>
+<div class="mb-3"><strong>b. 変化</strong><br>${currentAiResult["変化"] || "分析中"}</div>
+<div class="mb-3"><strong>c. 成功事例</strong><br>${currentAiResult["成功事例"] || "分析中"}</div>
+<div class="mb-3"><strong>d. 懸念点</strong><br>${currentAiResult["懸念点"] || "分析中"}</div>
+<div class="mb-1"><strong>e. 問い</strong><br>${currentAiResult["問い"] || "分析中"}</div>
+                    `.trim();
 
-                    if (aiTitleText) aiTitleText.textContent = currentAiResult["推奨タイトル"] || "無題の提案";
-                    if (aiRefinedText) aiRefinedText.textContent = currentAiResult["要約200"] || "";
+                    aiTitleText.textContent = currentAiResult["推奨タイトル"] || "無題の提案";
+                    aiRefinedText.textContent = currentAiResult["要約200"] || "";
 
-                    if (aiPlaceholder) aiPlaceholder.style.setProperty("display", "none", "important");
-                    if (aiAssistBox) {
-                        aiAssistBox.style.setProperty("display", "flex", "important");
-                        aiAssistBox.classList.remove("d-none");
-                    }
+                    aiPlaceholder.style.setProperty("display", "none", "important");
+                    aiAssistBox.style.setProperty("display", "flex", "important");
+                    aiAssistBox.classList.remove("d-none");
                 } else {
                     alert("AI分析エラー: " + data.message);
                 }
@@ -99,61 +95,45 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // 📤 提案箱へ正式投稿するボタンのイベント
-        // 📤 提案箱へ正式投稿するボタンのイベント
+    // 投稿ボタン
     if (btnSubmitToBox) {
         btnSubmitToBox.addEventListener("click", async function () {
             if (!currentAiResult) return;
 
-            const bigCat = currentAiResult["大分類"] || currentAiResult.bigCatId || "その他";
-            const midCat = currentAiResult["中分類"] || currentAiResult.midCatId || "その他";
-            const smallCat = currentAiResult["小分類"] || "";
+            const bigCat = currentAiResult["大分類"] || "その他";
+            const midCat = currentAiResult["中分類"] || "その他";
 
-            // 手動分類選択（HTMLのselect）
-            // カテゴリの取得（既存の処理）
-            // 削除の代わりに、AIの判定結果（bigCat, midCat）をそのまま使用する
-// これにより、手動選択のロジックを完全に排除します
-const finalBigCat = bigCat; // AIが判定した大分類名称
-const finalMidCat = midCat; // AIが判定した中分類名称
-            // 投稿の確認ダイアログの生成と判定
-           // 投稿の確認ダイアログ（名称のみを使用）
-const message = `正式に提案箱へ投稿しますか？\n(大分類「${finalBigCat}」 > 中分類「${finalMidCat}」へ格納されます)`;
-
-if (!confirm(message)) {
-    return; // キャンセル
-}
+            const message = `正式に提案箱へ投稿しますか？\n(大分類「${bigCat}」 > 中分類「${midCat}」へ格納されます)`;
+            if (!confirm(message)) return;
 
             const txtContent = document.getElementById("content");
             const rawText = txtContent ? txtContent.value.trim() : "";
 
             btnSubmitToBox.disabled = true;
-            btnSubmitToBox.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> 提案箱へ投稿中...`;
+            btnSubmitToBox.innerHTML = `<span class="spinner-border spinner-border-sm"></span> 投稿中...`;
 
             try {
                 const res = await fetch(GAS_URL, {
                     method: "POST",
                     headers: { "Content-Type": "text/plain" },
-                    // 修正対象: 投稿時の body 送信部分
-// 修正対象: fetch(GAS_URL, {...}) の直前にある body: JSON.stringify({...}) の部分
-body: JSON.stringify({
-    action: "submit",
-    content: rawText,
-    title: currentAiResult["推奨タイトル"] || "無題の提案",
-    summary: currentAiResult["要約200"] || "",
-    // 【強制上書き】AIの結果がない場合でも「その他」とする
-    bigCatName: currentAiResult["大分類"] || "その他",
-    midCatName: currentAiResult["中分類"] || "その他",
-    aiResult: currentAiResult
-})
+                    body: JSON.stringify({
+                        action: "submit",
+                        content: rawText,
+                        title: currentAiResult["推奨タイトル"] || "無題の提案",
+                        summary: currentAiResult["要約200"] || "",
+                        bigCatName: bigCat,
+                        midCatName: midCat,
+                        aiResult: currentAiResult
+                    })
                 });
                 const data = await res.json();
 
                 if (data.status === "success") {
                     alert(`📥 投稿が完了しました！`);
-                    
-                    if (txtContent) txtContent.value = "";
-                    if (aiAssistBox) aiAssistBox.classList.add("d-none");
-                    if (aiPlaceholder) aiPlaceholder.style.removeProperty("display");
+
+                    txtContent.value = "";
+                    aiAssistBox.classList.add("d-none");
+                    aiPlaceholder.style.removeProperty("display");
                     currentAiResult = null;
 
                     await fetchOpinions();
@@ -174,16 +154,12 @@ body: JSON.stringify({
 });
 
 // ==========================================
-// 3. データ取得・バックエンド連携
+// 3. データ取得
 // ==========================================
 async function fetchOpinions() {
-
     try {
-
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
-
-        console.log(data);
 
         if (data.status !== "success") {
             console.error(data.message);
@@ -191,260 +167,118 @@ async function fetchOpinions() {
         }
 
         allOpinions = data.opinions || [];
-
-        console.log(allOpinions);
-
         renderStructuredIdeas(allOpinions);
 
     } catch (e) {
-
         console.error(e);
-
     }
-
 }
 
 // ==========================================
-// 4. 描画ロジック（アコーディオン式・名前表示版）
+// 4. 描画ロジック
 // ==========================================
-// 名称だけで構成された構造定義（IDは含みません）
+function renderStructuredIdeas(opinions) {
 
-// 4. 描画ロジック（アコーディオン式・内容表示・名称変換版）
-function renderStructuredIdeas(opinions){
+    const container = document.getElementById("proposal-container");
+    if (!container) return;
 
-    const container=document.getElementById("proposal-container");
-    if(!container) return;
+    container.innerHTML = "";
 
-    container.innerHTML="";
-
-    //==========================
     // 固定ツリー
-    //==========================
-
-    const CATEGORY={
-
-       "まちづくり・都市計画（住みやすさの基盤）":[
-            "住宅・まちなみ", 
-            "交通・移動手段", 
-            "公園・緑地・景観", 
-            "防災・レジリエンス", 
-            "その他"
-        ],
-
-        "子育て・教育環境（次世代を育てるまち）":[
-           "保育・教育施設", 
-           "子ども・若者の居場所", 
-           "学びの機会（生涯学習）", 
-           "家族支援", 
-           "その他"
-        ],
-
-        "福祉・健康・共生（誰も取り残さないまち）":[
-           "高齢者支援", 
-           "障害者・多様な人々の支援", 
-           "健康づくり", 
-           "地域コミュニティ", 
-           "その他"
-        ],
-
-        "環境・持続可能性（未来に繋ぐ芦屋）":[
-             "気候変動対策", 
-             "資源循環・ごみ問題", 
-             "自然環境保全", 
-             "エネルギー・脱炭素", 
-             "その他"
-       ],     
-
-        "行政・市民参加・活力（より良い市政へ）":[
-             "行政の透明性・効率化", 
-             "市民参加・協働", 
-             "文化・芸術・スポーツ", 
-             "産業・雇用・にぎわい", 
-             "その他"
-       ],   
-
+    const CATEGORY = {
+        "まちづくり・都市計画（住みやすさの基盤）": ["住宅・まちなみ", "交通・移動手段", "公園・緑地・景観", "防災・レジリエンス", "その他"],
+        "子育て・教育環境（次世代を育てるまち）": ["保育・教育施設", "子ども・若者の居場所", "学びの機会（生涯学習）", "家族支援", "その他"],
+        "福祉・健康・共生（誰も取り残さないまち）": ["高齢者支援", "障害者・多様な人々の支援", "健康づくり", "地域コミュニティ", "その他"],
+        "環境・持続可能性（未来に繋ぐ芦屋）": ["気候変動対策", "資源循環・ごみ問題", "自然環境保全", "エネルギー・脱炭素", "その他"],
+        "行政・市民参加・活力（より良い市政へ）": ["行政の透明性・効率化", "市民参加・協働", "文化・芸術・スポーツ", "産業・雇用・にぎわい", "その他"]
     };
 
+    // AI名称 → 固定ツリー名称変換
+    const BIGMAP = {
+        "まちづくり・都市計画": "まちづくり・都市計画（住みやすさの基盤）",
+        "子育て・教育環境": "子育て・教育環境（次世代を育てるまち）",
+        "福祉・健康・共生": "福祉・健康・共生（誰も取り残さないまち）",
+        "環境・持続可能性": "環境・持続可能性（未来に繋ぐ芦屋）",
+        "行政・市民参加・活力": "行政・市民参加・活力（より良い市政へ）"
+    };
 
+    let html = "";
+    let bigIndex = 0;
 
-  //==========================
-// 固定ツリー
-//==========================
-const CATEGORY = {
-   "まちづくり・都市計画（住みやすさの基盤）":[ ... ],
-   "子育て・教育環境（次世代を育てるまち）":[ ... ],
-   "福祉・健康・共生（誰も取り残さないまち）":[ ... ],
-   "環境・持続可能性（未来に繋ぐ芦屋）":[ ... ],
-   "行政・市民参加・活力（より良い市政へ）":[ ... ]
-};
+    Object.keys(CATEGORY).forEach(big => {
 
-//==========================
-// AI名称 → 固定ツリー名称変換
-//==========================
-const BIGMAP = {
-    "まちづくり・都市計画": "まちづくり・都市計画（住みやすさの基盤）",
-    "子育て・教育環境": "子育て・教育環境（次世代を育てるまち）",
-    "福祉・健康・共生": "福祉・健康・共生（誰も取り残さないまち）",
-    "環境・持続可能性": "環境・持続可能性（未来に繋ぐ芦屋）",
-    "行政・市民参加・活力": "行政・市民参加・活力（より良い市政へ）"
-};
-
-
-
-
-
-    //==========================
-    // HTML作成
-    //==========================
-
-    let html="";
-
-    let bigIndex=0;
-
-    Object.keys(CATEGORY).forEach(big=>{
-
-        html+=`
+        html += `
 <div class="accordion mb-3">
-
 <div class="accordion-item">
-
 <h2 class="accordion-header">
-
-<button class="accordion-button collapsed"
-
-type="button"
-
-data-bs-toggle="collapse"
-
-data-bs-target="#big${bigIndex}">
-
+<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#big${bigIndex}">
 🌳 ${big}
-
 </button>
-
 </h2>
-
-<div id="big${bigIndex}"
-
-class="accordion-collapse collapse">
-
+<div id="big${bigIndex}" class="accordion-collapse collapse">
 <div class="accordion-body">
 `;
 
-        let midIndex=0;
+        let midIndex = 0;
 
-        CATEGORY[big].forEach(mid=>{
+        CATEGORY[big].forEach(mid => {
 
-            html+=`
+            html += `
 <div class="accordion mb-2">
-
 <div class="accordion-item">
-
 <h2 class="accordion-header">
-
-<button class="accordion-button collapsed"
-
-type="button"
-
-data-bs-toggle="collapse"
-
-data-bs-target="#mid${bigIndex}_${midIndex}">
-
+<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mid${bigIndex}_${midIndex}">
 📂 ${mid}
-
 </button>
-
 </h2>
-
-<div id="mid${bigIndex}_${midIndex}"
-
-class="accordion-collapse collapse">
-
+<div id="mid${bigIndex}_${midIndex}" class="accordion-collapse collapse">
 <div class="accordion-body">
 `;
 
             opinions
-            .filter(op=>{
+                .filter(op => {
+                    const bigName = BIGMAP[op.bigCatName] || op.bigCatName;
+                    return bigName === big && op.midCatName === mid;
+                })
+                .forEach((post, p) => {
 
-                const bigName=BIGMAP[op.bigCatName]||op.bigCatName;
-
-                return bigName===big && op.midCatName===mid;
-
-            })
-            .forEach((post,p)=>{
-
-                html+=`
-
+                    html += `
 <div class="accordion mb-2">
-
 <div class="accordion-item">
-
 <h2 class="accordion-header">
-
-<button class="accordion-button collapsed"
-
-data-bs-toggle="collapse"
-
-data-bs-target="#post${bigIndex}_${midIndex}_${p}">
-
+<button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#post${bigIndex}_${midIndex}_${p}">
 📝 ${post.title}
-
 </button>
-
 </h2>
-
-<div id="post${bigIndex}_${midIndex}_${p}"
-
-class="accordion-collapse collapse">
-
+<div id="post${bigIndex}_${midIndex}_${p}" class="accordion-collapse collapse">
 <div class="accordion-body">
-
 ${post.summary}
-
 </div>
-
 </div>
-
 </div>
-
 </div>
-
 `;
+                });
 
-            });
-
-            html+=`
-
+            html += `
 </div>
-
 </div>
-
 </div>
-
 </div>
-
 `;
 
             midIndex++;
-
         });
 
-        html+=`
-
+        html += `
 </div>
-
 </div>
-
 </div>
-
 </div>
-
 `;
 
         bigIndex++;
-
     });
 
-    container.innerHTML=html;
-
+    container.innerHTML = html;
 }
