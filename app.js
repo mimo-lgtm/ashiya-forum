@@ -1,4 +1,4 @@
-const GAS_URL = "https://script.google.com/macros/s/AKfycbz7_nn1uo5pr58A0uUm1VvxxcC3uiLdiDllXJf72T4Yv8gvdcrtr5KTEVxK8t3I_UJACg/exec";
+var GAS_URL = "https://script.google.com/macros/s/AKfycbz7_nn1uo5pr58A0uUm1VvxxcC3uiLdiDllXJf72T4Yv8gvdcrtr5KTEVxK8t3I_UJACg/exec";
 
 let allOpinions = [];
 
@@ -60,23 +60,17 @@ async function aiAnalysis() {
 
         document.getElementById("midCatName").value = r.midCatName || "";
 
-        document.getElementById("aiResult").innerHTML = `
-
+        document.getElementById("aiSummaryText").innerHTML = `
 <b>核心</b><br>
 ${r["核心"]}<br><br>
-
 <b>期待される変化</b><br>
 ${r["変化"]}<br><br>
-
 <b>成功事例</b><br>
 ${r["成功事例"]}<br><br>
-
 <b>懸念点</b><br>
 ${r["懸念点"]}<br><br>
-
 <b>AIからの問い</b><br>
 ${r["問い"]}
-
 `;
 
     }
