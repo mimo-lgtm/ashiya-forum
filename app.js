@@ -26,11 +26,22 @@ const CATEGORY_MASTER = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+    // 初回読み込みだけ
     fetchOpinions();
+    
     const btnAiAnalysis = document.getElementById("btnAiAnalysis");
     const btnSubmitToBox = document.getElementById("btnSubmitToBox");
     if (btnAiAnalysis) btnAiAnalysis.addEventListener("click", aiAnalysis);
     if (btnSubmitToBox) btnSubmitToBox.addEventListener("click", submitOpinion);
+    
+    // 提案箱タブをクリックしたら再描画
+    const proposalTab = document.querySelector('[data-bs-target="#proposal-tab"], a[href="#proposal-tab"]');
+    if (proposalTab) {
+        proposalTab.addEventListener('shown.bs.tab', () => {
+            console.log('提案箱タブが表示された');
+            renderProposalTree(allOpinions);
+        });
+    }
 });
 
 async function aiAnalysis() {
