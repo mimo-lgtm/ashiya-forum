@@ -259,6 +259,20 @@ function toggleTree(element) {
         element.innerHTML = element.innerHTML.replace("▶", "▼");
     }
 }
+function toggleTree(element) {
+    const body = element.nextElementSibling;
+    if (!body) return;
+
+    const isOpen = body.style.display === 'block';
+
+    if (isOpen) {
+        body.style.display = "none";
+        element.innerHTML = element.innerHTML.replace("▼", "▶");
+    } else {
+        body.style.display = "block";
+        element.innerHTML = element.innerHTML.replace("▶", "▼");
+    }
+}
 
 function toggleTree(element) {
     const body = element.nextElementSibling;
