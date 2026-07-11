@@ -335,12 +335,7 @@ body {
 .tree-post-title:hover{
     opacity:.9;
 }
-.tree-big-body, .tree-mid-body {
-  display: block !important;
-}
-.tree-post-body {
-  display: block !important;
-}
+
 .tree-big-body,
 .tree-mid-body,
 .tree-post-body {
