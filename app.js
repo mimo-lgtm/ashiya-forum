@@ -223,8 +223,8 @@ function renderProposalTree(opinions) {
             totalMatched += bigCount;
             html += `
 <div class="tree-big">
-  <div class="tree-big-title" onclick="toggleTree(this)">▶ ${escapeHtml(big)} (${bigCount})</div>
-  <div class="tree-big-body">
+  <div class="tree-big-title" onclick="toggleTree(this)">▼ ${escapeHtml(big)} (${bigCount})</div>
+  <div class="tree-big-body" style="display:block">
     ${bigHtml}
   </div>
 </div>
