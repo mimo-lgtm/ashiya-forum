@@ -354,3 +354,9 @@ body {
   color: #64748b;
   font-style: italic;
 }
+/* 最終勝者：何があっても閉じる */
+#proposal-container .tree-big-body,
+#proposal-container .tree-mid-body,
+#proposal-container .tree-post-body {
+  display: none !important;
+}
