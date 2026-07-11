@@ -173,15 +173,15 @@ async function fetchOpinions() {
 function renderProposalTree(opinions) {
     const container = document.getElementById("proposal-container");
     if (!container) {
-        console.error('proposal-containerが無い');
+        console.error('proposal-container not found');
         return;
     }
-    container.innerHTML = "";
 
-    console.log('描画開始: 全', opinions.length, '件');
+    // 一旦全部消す
+    container.innerHTML = '';
+    container.style.cssText = 'font-size:10.5pt; width:100%; padding:20px 0;';
 
-    let html = "";
-    let totalMatched = 0;
+    let totalCount = 0;
 
     Object.keys(CATEGORY_MASTER).forEach((bigId) => {
         const big = CATEGORY_MASTER[bigId].name;
@@ -202,48 +202,75 @@ function renderProposalTree(opinions) {
             if (matched.length === 0) return;
             bigCount += matched.length;
 
-            bigHtml += `
-    <div class="tree-mid">
-      <div class="tree-mid-title" onclick="toggleTree(this)">▶ ${escapeHtml(mid)} (${matched.length})</div>
-      <div class="tree-mid-body">
-`;
+            let postsHtml = '';
             matched.forEach((post) => {
                 let icon = "📝";
-                let cls = "single";
-                if (post.status == "新統合") { icon = "⭐"; cls = "merged"; }
-                if (post.status == "元記事") { icon = "📄"; cls = "original"; }
-                bigHtml += `
-        <div class="tree-post ${cls}">
-          <div class="tree-post-title" onclick="toggleTree(this)">
-            ${icon} ${escapeHtml(post.title)}
-          </div>
-          <div class="tree-post-body">
-            <div class="proposal-summary">${escapeHtml(post.summary)}</div>
-            ${post.status == "元記事"? `<div class="merge-info">統合先：${escapeHtml(post.mergeTitle)}</div>` : ""}
-          </div>
-        </div>
-`;
+                let borderColor = '#94a3b8';
+                if (post.status == "新統合") { icon = "⭐"; borderColor = '#f59e0b'; }
+                if (post.status == "元記事") { icon = "📄"; borderColor = '#64748b'; }
+
+                postsHtml += `
+                    <div style="margin:6px 0; padding:10px 12px; border-left:3px solid ${borderColor}; background:#fff; border-radius:4px;">
+                        <div class="post-toggle" style="cursor:pointer; font-weight:600; color:#1e293b;">
+                            ${icon} ${escapeHtml(post.title)}
+                        </div>
+                        <div class="post-content" style="display:none; padding:10px; margin-top:8px; background:#f8fafc; border-radius:6px; font-size:10pt; line-height:1.7;">
+                            <div style="color:#475569; white-space:pre-wrap;">${escapeHtml(post.summary)}</div>
+                            ${post.status == "元記事"? `<div style="margin-top:6px; font-size:9pt; color:#64748b; font-style:italic;">統合先：${escapeHtml(post.mergeTitle)}</div>` : ""}
+                        </div>
+                    </div>
+                `;
             });
-            bigHtml += `</div></div>`;
+
+            bigHtml += `
+                <div style="margin-bottom:8px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;">
+                    <div class="mid-toggle" style="padding:10px 14px; background:#f1f5f9; color:#334155; font-weight:600; cursor:pointer; user-select:none;">
+                        ▶ ${escapeHtml(mid)} (${matched.length})
+                    </div>
+                    <div class="mid-content" style="display:none; padding:8px 12px;">
+                        ${postsHtml}
+                    </div>
+                </div>
+            `;
         });
 
         if (bigCount > 0) {
-            totalMatched += bigCount;
-            html += `
-<div class="tree-big">
-  <div class="tree-big-title" onclick="toggleTree(this)">▶ ${escapeHtml(big)} (${bigCount})</div>
-  <div class="tree-big-body">
-    ${bigHtml}
-  </div>
-</div>
-`;
-            console.log(`${big}: ${bigCount}件マッチ`);
+            totalCount += bigCount;
+            const bigEl = document.createElement('div');
+            bigEl.style.cssText = 'margin-bottom:12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05);';
+            bigEl.innerHTML = `
+                <div class="big-toggle" style="padding:14px 18px; background:linear-gradient(90deg, #e0f2fe, #f0f9ff); color:#0c4a6e; font-weight:700; cursor:pointer; user-select:none;">
+                    ▶ ${escapeHtml(big)} (${bigCount})
+                </div>
+                <div class="big-content" style="display:none; padding:12px 16px; background:#f8fafc; border-top:1px solid #e2e8f0;">
+                    ${bigHtml}
+                </div>
+            `;
+            container.appendChild(bigEl);
         }
     });
 
-    container.innerHTML = html || '<p class="text-muted p-3">表示できる提案がありません</p>';
-    console.log(`描画完了: ${totalMatched}/${opinions.length}件表示`);
+    if (totalCount === 0) {
+        container.innerHTML = '<p style="padding:12px; color:#64748b;">表示できる提案がありません</p>';
+        return;
+    }
+
+    // イベント付与：これで確実に動く
+    container.querySelectorAll('.big-toggle,.mid-toggle,.post-toggle').forEach(el => {
+        el.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const content = this.nextElementSibling;
+            if (!content) return;
+            const isOpen = content.style.display === 'block';
+            content.style.display = isOpen? 'none' : 'block';
+            this.innerHTML = this.innerHTML.replace(isOpen? '▼' : '▶', isOpen? '▶' : '▼');
+        });
+    });
+
+    console.log('描画完了:', totalCount, '件');
 }
+
+// toggleTree関数はもう使わないので削除でOK
 
 function toggleTree(element) {
     const body = element.nextElementSibling;
