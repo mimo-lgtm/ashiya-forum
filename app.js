@@ -240,8 +240,9 @@ function toggleTree(element) {
     const body = element.nextElementSibling;
     if (!body) return;
     
-    // 初回クリック時に空文字をnone扱いにする
-    const isOpen = body.style.display === "block";
+    // getComputedStyleで初期状態を取得。空文字ならnone扱い
+    const currentDisplay = window.getComputedStyle(body).display;
+    const isOpen = currentDisplay !== 'none';
     
     if (isOpen) {
         body.style.display = "none";
