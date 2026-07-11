@@ -150,33 +150,46 @@ async function fetchOpinions() {
 
 function renderProposalTree(opinions) {
     const container = document.getElementById("proposal-container");
-    if (!container) return;
+    if (!container) return console.error('proposal-containerが無い');
     container.innerHTML = "";
 
+    console.log('描画開始: 全', opinions.length, '件');
+
     let html = "";
+    let totalMatched = 0;
+
     Object.keys(CATEGORY_MASTER).forEach((bigId) => {
         const big = CATEGORY_MASTER[bigId].name;
         const mids = CATEGORY_MASTER[bigId].mids;
-        html += `
-<div class="tree-big">
-  <div class="tree-big-title" onclick="toggleTree(this)">▶ ${big}</div>
-  <div class="tree-big-body">
-`;
+        let bigHtml = "";
+        let bigCount = 0;
+
         Object.keys(mids).forEach((midId) => {
             const mid = mids[midId];
-            html += `
+            const matched = opinions.filter(o => {
+                const oBig = (o.bigCatName || "").trim().replace(/\s+/g,'');
+                const oMid = (o.midCatName || "").trim();
+                const cBig = big.trim().replace(/\s+/g,'');
+                const cMid = mid.trim();
+                // 括弧付きを優先、無ければ部分一致
+                const bigMatch = oBig === cBig || oBig.includes(cBig) || cBig.includes(oBig);
+                return bigMatch && oMid === cMid;
+            });
+
+            if (matched.length === 0) return;
+            bigCount += matched.length;
+
+            bigHtml += `
     <div class="tree-mid">
-      <div class="tree-mid-title" onclick="toggleTree(this)">▶ ${mid}</div>
+      <div class="tree-mid-title" onclick="toggleTree(this)">▶ ${escapeHtml(mid)} (${matched.length})</div>
       <div class="tree-mid-body">
 `;
-            opinions
-             .filter(o => o.bigCatName == big && o.midCatName == mid)
-             .forEach((post) => {
-                    let icon = "📝";
-                    let cls = "single";
-                    if (post.status == "新統合") { icon = "⭐"; cls = "merged"; }
-                    if (post.status == "元記事") { icon = "📄"; cls = "original"; }
-                    html += `
+            matched.forEach((post) => {
+                let icon = "📝";
+                let cls = "single";
+                if (post.status == "新統合") { icon = "⭐"; cls = "merged"; }
+                if (post.status == "元記事") { icon = "📄"; cls = "original"; }
+                bigHtml += `
         <div class="tree-post ${cls}">
           <div class="tree-post-title" onclick="toggleTree(this)">
             ${icon} ${escapeHtml(post.title)}
@@ -187,14 +200,27 @@ function renderProposalTree(opinions) {
           </div>
         </div>
 `;
-                });
-            html += `</div></div>`;
+            });
+            bigHtml += `</div></div>`;
         });
-        html += `</div></div>`;
-    });
-    container.innerHTML = html;
-}
 
+        if (bigCount > 0) {
+            totalMatched += bigCount;
+            html += `
+<div class="tree-big">
+  <div class="tree-big-title" onclick="toggleTree(this)">▶ ${escapeHtml(big)} (${bigCount})</div>
+  <div class="tree-big-body">
+    ${bigHtml}
+  </div>
+</div>
+`;
+            console.log(`${big}: ${bigCount}件マッチ`);
+        }
+    });
+
+    container.innerHTML = html || '<p class="text-muted">表示できる提案がありません</p>';
+    console.log(`描画完了: ${totalMatched}/${opinions.length}件表示`);
+}
 function toggleTree(element) {
     const body = element.nextElementSibling;
     if (!body) return;
