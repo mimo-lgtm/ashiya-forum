@@ -172,7 +172,10 @@ async function fetchOpinions() {
 
 function renderProposalTree(opinions) {
     const container = document.getElementById("proposal-container");
-    if (!container) return console.error('proposal-containerが無い');
+    if (!container) {
+        console.error('proposal-containerが無い');
+        return;
+    }
     container.innerHTML = "";
 
     console.log('描画開始: 全', opinions.length, '件');
@@ -189,12 +192,11 @@ function renderProposalTree(opinions) {
         Object.keys(mids).forEach((midId) => {
             const mid = mids[midId];
             const matched = opinions.filter(o => {
-                const oBig = (o.bigCatName || "").trim().replace(/\s+/g,'');
+                const oBig = (o.bigCatName || "").trim();
                 const oMid = (o.midCatName || "").trim();
-                const cBig = big.trim().replace(/\s+/g,'');
-                const cMid = mid.trim();
-                const bigMatch = oBig === cBig || oBig.includes(cBig) || cBig.includes(oBig);
-                return bigMatch && oMid === cMid;
+                const bigMatch = oBig.includes(big.split('（')[0]) || big.includes(oBig.split('（')[0]);
+                const midMatch = oMid === mid || oMid.includes(mid) || mid.includes(oMid);
+                return bigMatch && midMatch;
             });
 
             if (matched.length === 0) return;
@@ -217,7 +219,7 @@ function renderProposalTree(opinions) {
           </div>
           <div class="tree-post-body">
             <div class="proposal-summary">${escapeHtml(post.summary)}</div>
-            ${post.status == "元記事" ? `<div class="merge-info">統合先：${escapeHtml(post.mergeTitle)}</div>` : ""}
+            ${post.status == "元記事"? `<div class="merge-info">統合先：${escapeHtml(post.mergeTitle)}</div>` : ""}
           </div>
         </div>
 `;
@@ -229,8 +231,8 @@ function renderProposalTree(opinions) {
             totalMatched += bigCount;
             html += `
 <div class="tree-big">
-  <div class="tree-big-title" onclick="toggleTree(this)">▼ ${escapeHtml(big)} (${bigCount})</div>
-  <div class="tree-big-body" style="display:block">
+  <div class="tree-big-title" onclick="toggleTree(this)">▶ ${escapeHtml(big)} (${bigCount})</div>
+  <div class="tree-big-body">
     ${bigHtml}
   </div>
 </div>
@@ -239,8 +241,23 @@ function renderProposalTree(opinions) {
         }
     });
 
-    container.innerHTML = html || '<p class="text-muted">表示できる提案がありません</p>';
+    container.innerHTML = html || '<p class="text-muted p-3">表示できる提案がありません</p>';
     console.log(`描画完了: ${totalMatched}/${opinions.length}件表示`);
+}
+
+function toggleTree(element) {
+    const body = element.nextElementSibling;
+    if (!body) return;
+
+    const isOpen = body.style.display === 'block';
+
+    if (isOpen) {
+        body.style.display = "none";
+        element.innerHTML = element.innerHTML.replace("▼", "▶");
+    } else {
+        body.style.display = "block";
+        element.innerHTML = element.innerHTML.replace("▶", "▼");
+    }
 }
 
 function toggleTree(element) {
