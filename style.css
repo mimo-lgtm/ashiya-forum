@@ -341,3 +341,8 @@ body {
 .tree-post-body {
   display: block !important;
 }
+.tree-big-body,
+.tree-mid-body,
+.tree-post-body {
+  display: none;
+}
