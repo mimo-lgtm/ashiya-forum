@@ -2,13 +2,12 @@
 var GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbz7_nn1uo5pr58A0uUm1VvxxcC3uiLdiDllXJf72T4Yv8gvdcrtr5KTEVxK8t3I_UJACg/exec";
 var allOpinions = window.allOpinions || [];
 
-// 固定マスター。GAS側と合わせる
 const CATEGORY_MASTER = {
-  "BIG-1": { name: "教育・子育て", mids: { "MID-1": "学校教育", "MID-2": "幼児教育", "MID-3": "家庭・子育て支援", "MID-4": "その他" } },
-  "BIG-2": { name: "福祉・健康", mids: { "MID-1": "高齢者福祉", "MID-2": "障がい福祉", "MID-3": "健康づくり", "MID-4": "その他" } },
-  "BIG-3": { name: "防災・安全", mids: { "MID-1": "防災", "MID-2": "防犯", "MID-3": "交通安全", "MID-4": "その他" } },
-  "BIG-4": { name: "環境・都市", mids: { "MID-1": "公園・緑", "MID-2": "道路・交通", "MID-3": "景観・まちづくり", "MID-4": "その他" } },
-  "BIG-5": { name: "地域・行政", mids: { "MID-1": "地域コミュニティ", "MID-2": "行政サービス", "MID-3": "市民参加", "MID-4": "その他" } }
+  "BIG-1": { name: "まちづくり・都市計画", mids: { "MID-1": "住宅・まちなみ", "MID-2": "交通・移動手段", "MID-3": "公園・緑地・景観", "MID-4": "防災・レジリエンス", "MID-5": "その他" } },
+  "BIG-2": { name: "子育て・教育環境", mids: { "MID-1": "保育・教育施設", "MID-2": "子ども・若者の居場所", "MID-3": "学びの機会（生涯学習）", "MID-4": "家族支援", "MID-5": "その他" } },
+  "BIG-3": { name: "福祉・健康・共生", mids: { "MID-1": "高齢者支援", "MID-2": "障害者・多様な人々の支援", "MID-3": "健康づくり", "MID-4": "地域コミュニティ", "MID-5": "その他" } },
+  "BIG-4": { name: "環境・持続可能性", mids: { "MID-1": "気候変動対策", "MID-2": "資源循環・ごみ問題", "MID-3": "自然環境保全", "MID-4": "エネルギー・脱炭素", "MID-5": "その他" } },
+  "BIG-5": { name: "行政・市民参加・活力", mids: { "MID-1": "行政の透明性・効率化", "MID-2": "市民参加・協働", "MID-3": "文化・芸術・スポーツ", "MID-4": "産業・雇用・にぎわい", "MID-5": "その他" } }
 };
 
 document.addEventListener("DOMContentLoaded", () => {
