@@ -26,7 +26,7 @@ const CATEGORY_MASTER = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 初回読み込みだけ
+    // 初回読み込み
     fetchOpinions();
     
     const btnAiAnalysis = document.getElementById("btnAiAnalysis");
@@ -34,10 +34,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnAiAnalysis) btnAiAnalysis.addEventListener("click", aiAnalysis);
     if (btnSubmitToBox) btnSubmitToBox.addEventListener("click", submitOpinion);
     
-    // 提案箱タブをクリックしたら再描画
-    const proposalTab = document.querySelector('[data-bs-target="#proposal-tab"], a[href="#proposal-tab"]');
-    if (proposalTab) {
-        proposalTab.addEventListener('shown.bs.tab', () => {
+    // ★修正: タブ3「届いた提案箱」をクリックしたら再描画
+    const listTabBtn = document.getElementById('list-tab-btn');
+    if (listTabBtn) {
+        listTabBtn.addEventListener('shown.bs.tab', () => {
             console.log('提案箱タブが表示された');
             renderProposalTree(allOpinions);
         });
@@ -59,18 +59,16 @@ async function aiAnalysis() {
             body: JSON.stringify({ action: "analyze", content: content })
         });
         const data = await res.json();
-        if (data.status!== "success") {
+        if (data.status !== "success") {
             alert(data.message || "AI解析に失敗しました");
             return;
         }
 
         const r = data.result;
-        // ID→名前に変換
         const big = CATEGORY_MASTER[r.bigCatId];
-        const bigCatName = big? big.name : "その他";
-        const midCatName = big && big.mids[r.midCatId]? big.mids[r.midCatId] : "その他";
+        const bigCatName = big ? big.name : "その他";
+        const midCatName = big && big.mids[r.midCatId] ? big.mids[r.midCatId] : "その他";
 
-        // hidden inputに保存。無ければスキップ
         const setVal = (id, val) => {
             const el = document.getElementById(id);
             if (el) el.value = val || "";
@@ -80,14 +78,12 @@ async function aiAnalysis() {
         setVal("bigCatName", bigCatName);
         setVal("midCatName", midCatName);
 
-        // 画面表示用
         const titleEl = document.getElementById("aiTitleText");
         if (titleEl) titleEl.textContent = r["推奨タイトル"] || "";
 
         const refinedEl = document.getElementById("aiRefinedText");
         if (refinedEl) refinedEl.textContent = r["要約200"] || "";
 
-        // 分類を表示する
         const summaryEl = document.getElementById("aiSummaryText");
         if (summaryEl) summaryEl.innerHTML = `
 <div class="mb-2"><span class="badge bg-info">大分類</span> ${escapeHtml(bigCatName)}</div>
@@ -111,7 +107,7 @@ async function aiAnalysis() {
 async function submitOpinion() {
     const getVal = (id) => {
         const el = document.getElementById(id);
-        return el? el.value.trim() : "";
+        return el ? el.value.trim() : "";
     };
 
     const title = getVal("title");
@@ -121,11 +117,11 @@ async function submitOpinion() {
     const midCatName = getVal("midCatName");
     const author = getVal("author");
 
-    if (!title ||!summary ||!content) {
+    if (!title || !summary || !content) {
         alert("タイトル・要約・内容を入力してください。先にAI壁打ちを実行してください。");
         return;
     }
-    if (!bigCatName ||!midCatName) {
+    if (!bigCatName || !midCatName) {
         alert("分類が判定できませんでした。AI壁打ちをやり直してください。");
         return;
     }
@@ -144,7 +140,7 @@ async function submitOpinion() {
             })
         });
         const data = await res.json();
-        console.log('GASからの返事:', data); // デバッグ用
+        console.log('GASからの返事:', data);
 
         if (data.status == "success") {
             await fetchOpinions();
@@ -163,7 +159,7 @@ async function fetchOpinions() {
     try {
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
-        if (data.status!== "success") {
+        if (data.status !== "success") {
             console.error(data.message);
             return;
         }
@@ -197,7 +193,6 @@ function renderProposalTree(opinions) {
                 const oMid = (o.midCatName || "").trim();
                 const cBig = big.trim().replace(/\s+/g,'');
                 const cMid = mid.trim();
-                // 括弧付きを優先、無ければ部分一致
                 const bigMatch = oBig === cBig || oBig.includes(cBig) || cBig.includes(oBig);
                 return bigMatch && oMid === cMid;
             });
@@ -222,7 +217,7 @@ function renderProposalTree(opinions) {
           </div>
           <div class="tree-post-body">
             <div class="proposal-summary">${escapeHtml(post.summary)}</div>
-            ${post.status == "元記事"? `<div class="merge-info">統合先：${escapeHtml(post.mergeTitle)}</div>` : ""}
+            ${post.status == "元記事" ? `<div class="merge-info">統合先：${escapeHtml(post.mergeTitle)}</div>` : ""}
           </div>
         </div>
 `;
@@ -247,11 +242,11 @@ function renderProposalTree(opinions) {
     container.innerHTML = html || '<p class="text-muted">表示できる提案がありません</p>';
     console.log(`描画完了: ${totalMatched}/${opinions.length}件表示`);
 }
+
 function toggleTree(element) {
     const body = element.nextElementSibling;
     if (!body) return;
     
-    // getComputedStyleで初期状態を取得。空文字ならnone扱い
     const currentDisplay = window.getComputedStyle(body).display;
     const isOpen = currentDisplay !== 'none';
     
