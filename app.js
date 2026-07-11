@@ -239,7 +239,11 @@ function renderProposalTree(opinions) {
 function toggleTree(element) {
     const body = element.nextElementSibling;
     if (!body) return;
-    if (body.style.display === "block") {
+    
+    // 初回クリック時に空文字をnone扱いにする
+    const isOpen = body.style.display === "block";
+    
+    if (isOpen) {
         body.style.display = "none";
         element.innerHTML = element.innerHTML.replace("▼", "▶");
     } else {
