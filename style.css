@@ -417,7 +417,7 @@ body {
   font-size: 10.5pt;
 }
 
-#proposal-container.tree-big {
+#proposal-container .tree-big {
   margin-bottom: 12px;
   border: 1px solid #cbd5e1;
   border-radius: 10px;
@@ -426,7 +426,7 @@ body {
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-#proposal-container.tree-big-title {
+#proposal-container .tree-big-title {
   padding: 14px 18px;
   background: linear-gradient(90deg, #e0f2fe, #f0f9ff);
   color: #0c4a6e;
@@ -436,25 +436,25 @@ body {
   transition: background 0.2s;
 }
 
-#proposal-container.tree-big-title:hover {
+#proposal-container .tree-big-title:hover {
   background: linear-gradient(90deg, #bae6fd, #e0f2fe);
 }
 
-#proposal-container.tree-big-body {
+#proposal-container .tree-big-body {
   padding: 12px 16px;
   background: #f8fafc;
   border-top: 1px solid #e2e8f0;
   display: none;
 }
 
-#proposal-container.tree-mid {
+#proposal-container .tree-mid {
   margin-bottom: 8px;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   background: #fff;
 }
 
-#proposal-container.tree-mid-title {
+#proposal-container .tree-mid-title {
   padding: 10px 14px;
   background: #f1f5f9;
   color: #334155;
@@ -463,16 +463,16 @@ body {
   user-select: none;
 }
 
-#proposal-container.tree-mid-title:hover {
+#proposal-container .tree-mid-title:hover {
   background: #e2e8f0;
 }
 
-#proposal-container.tree-mid-body {
+#proposal-container .tree-mid-body {
   padding: 8px 12px;
   display: none;
 }
 
-#proposal-container.tree-post {
+#proposal-container .tree-post {
   margin: 6px 0;
   padding: 10px 12px;
   border-left: 3px solid #94a3b8;
@@ -481,23 +481,23 @@ body {
   box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 
-#proposal-container.tree-post.merged {
+#proposal-container .tree-post.merged {
   border-left-color: #f59e0b;
   background: #fffbeb;
 }
 
-#proposal-container.tree-post.original {
+#proposal-container .tree-post.original {
   border-left-color: #64748b;
   background: #f8fafc;
 }
 
-#proposal-container.tree-post-title {
+#proposal-container .tree-post-title {
   cursor: pointer;
   font-weight: 600;
   color: #1e293b;
 }
 
-#proposal-container.tree-post-body {
+#proposal-container .tree-post-body {
   display: none;
   padding: 10px;
   margin-top: 8px;
@@ -507,11 +507,11 @@ body {
   line-height: 1.7;
 }
 
-#proposal-container.proposal-summary {
+#proposal-container .proposal-summary {
   color: #475569;
 }
 
-#proposal-container.merge-info {
+#proposal-container .merge-info {
   margin-top: 6px;
   font-size: 9pt;
   color: #64748b;
