@@ -130,7 +130,7 @@ async function submitOpinion() {
         const res = await fetch(GAS_URL, {
             method: "POST",
             body: JSON.stringify({
-                action: "submit",
+                action: "addOpinion",  // ★ここだけ修正: submit → addOpinion
                 title,
                 summary,
                 content,
@@ -270,53 +270,6 @@ function renderProposalTree(opinions) {
     });
 
     console.log('描画完了:', totalCount, '件');
-}
-
-// toggleTree関数はもう使わないので削除でOK
-
-function toggleTree(element) {
-    const body = element.nextElementSibling;
-    if (!body) return;
-
-    const isOpen = body.style.display === 'block';
-
-    if (isOpen) {
-        body.style.display = "none";
-        element.innerHTML = element.innerHTML.replace("▼", "▶");
-    } else {
-        body.style.display = "block";
-        element.innerHTML = element.innerHTML.replace("▶", "▼");
-    }
-}
-function toggleTree(element) {
-    const body = element.nextElementSibling;
-    if (!body) return;
-
-    const isOpen = body.style.display === 'block';
-
-    if (isOpen) {
-        body.style.display = "none";
-        element.innerHTML = element.innerHTML.replace("▼", "▶");
-    } else {
-        body.style.display = "block";
-        element.innerHTML = element.innerHTML.replace("▶", "▼");
-    }
-}
-
-function toggleTree(element) {
-    const body = element.nextElementSibling;
-    if (!body) return;
-    
-    const currentDisplay = window.getComputedStyle(body).display;
-    const isOpen = currentDisplay !== 'none';
-    
-    if (isOpen) {
-        body.style.display = "none";
-        element.innerHTML = element.innerHTML.replace("▼", "▶");
-    } else {
-        body.style.display = "block";
-        element.innerHTML = element.innerHTML.replace("▶", "▼");
-    }
 }
 
 function clearForm() {
