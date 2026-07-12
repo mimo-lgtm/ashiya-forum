@@ -6,6 +6,7 @@
     <title>市民の声でつくる、芦屋の明日</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
             background-color: #f8fafc;
@@ -28,7 +29,7 @@
 </head>
 <body>
 
-    <!-- 🖼️ ページ最上部：メインヘッダー画像 -->
+    <!-- 🖼 ページ最上部：メインヘッダー画像 -->
     <div class="w-100 overflow-hidden shadow-sm mb-4" style="max-height: 380px; position: relative; background-color: #475569;">
         <img id="mainHeaderImg" src="image/river.jpg" 
              class="img-fluid w-100" 
@@ -50,7 +51,7 @@
                 <button class="nav-link active" id="wall-tab-btn" data-bs-toggle="tab" data-bs-target="#wall-tab-pane" type="button" role="tab" aria-controls="wall-tab-pane" aria-selected="true">✨ 1. AIと壁打ちする</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="map-tab-btn" data-bs-toggle="tab" data-bs-target="#map-tab-pane" type="button" role="tab" aria-controls="map-tab-pane" aria-selected="false">🗺️ 2. アイデアの地図</button>
+                <button class="nav-link" id="map-tab-btn" data-bs-toggle="tab" data-bs-target="#map-tab-pane" type="button" role="tab" aria-controls="map-tab-pane" aria-selected="false">🗺 2. アイデアの地図</button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="list-tab-btn" data-bs-toggle="tab" data-bs-target="#list-tab-pane" type="button" role="tab" aria-controls="list-tab-pane" aria-selected="false">📥 3. 届いた提案箱</button>
@@ -71,7 +72,7 @@
                 <div class="row g-4">
                     <div class="col-lg-5">
                         <div class="card shadow-sm border-0 p-4 h-100" style="border-radius: 12px;">
-                            <h5 class="fw-bold text-dark mb-3">🖋️ あなたの想いやアイデア</h5>
+                            <h5 class="fw-bold text-dark mb-3">🖋 あなたの想いやアイデア</h5>
                             <p class="text-muted small">芦屋市に関する気づき、課題感を自由に入力してください。</p>
                             <div class="mb-3 flex-grow-1">
                                 <textarea class="form-control h-100" id="content" rows="12" style="border-radius: 8px; resize: none;" placeholder="例：芦屋市では行政に私たちの意見が届いてない..."></textarea>
@@ -119,7 +120,7 @@
             </div>
 
             <!-- ========================================== -->
-            <!-- 🗺️ タブ2: アイデアの地図                           -->
+            <!-- 🗺 タブ2: アイデアの地図                           -->
             <!-- ========================================== -->
             <div class="tab-pane fade" id="map-tab-pane" role="tabpanel" aria-labelledby="map-tab-btn">
                 <!-- タブ2の中 -->
@@ -148,7 +149,7 @@
     <div class="col-md-6">
         <div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background: linear-gradient(145deg, #ffffff, #f0f7ff); border-left: 5px solid #3b82f6;">
             <h5 class="fw-bold text-primary mb-3 d-flex align-items-center">
-                <span class="me-2">🗺️</span> 未来提案の原点（アイデアの地図）
+                <span class="me-2">🗺</span> 未来提案の原点（アイデアの地図）
             </h5>
             <div id="map-analysis" class="text-secondary lh-base fs-6 font-monospace" style="white-space: pre-wrap;">データを構築中...</div>
         </div>
@@ -289,7 +290,6 @@
                                                 </h5>
                                                 <div class="text-secondary lh-base fs-6 font-monospace" id="base-text-シームレス" style="white-space: pre-wrap;">【全体傾向分析】多くの市民から、子どもたちが自発的に活動を選択できる環境づくりへの要望が寄せられています。画一的な一斉保育から脱却し、個々の興味関心に基づくプロジェクト型学習の導入や、デジタルを活用した自己表現の場を確保することが急務とされています。課題は自由度を高めた際の見守りの難しさですが、保育者が『教える』立場から『子どもの探求を支える』ファシリテーターへとシフトするための研修体制を整備することが、今後の現場改革における最大のブレイクスルーの鍵となります。</div>
                                             </div>
-                                        </div>
                                         <div class="col-md-6">
                                             <div class="p-4 bg-white rounded-4 h-100 shadow-sm border-start border-success border-4" style="background: linear-gradient(145deg, #ffffff, #f0fdf4) !important;">
                                                 <h5 class="fw-bold text-success mb-3 d-flex align-items-center">
@@ -323,6 +323,48 @@
                     <div class="col-12">
                         <div id="my-posts-panel" class="mb-4 border rounded bg-light"></div>
                         <div id="proposal-container"></div>
+                        
+                        <!-- ↓ここから追加：最終提案エリア ↓↓↓ -->
+                        <div class="mt-5 mb-5" id="final-proposal-section">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    <h5 class="mb-0 text-white">
+                                        <i class="bi bi-stars"></i> 最終提案：AI原案 × 市民の声
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted small mb-3">
+                                        大分類を選んでボタンを押すと、AIの初期案と市民から寄せられた新統合提案を融合した「最終提案」がリアルタイムで生成されます。
+                                    </p>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-md-8">
+                                            <label class="form-label fw-bold">大分類を選択</label>
+                                            <select id="bigcat-select" class="form-select form-select-lg">
+                                                <option value="まちづくり・都市計画">まちづくり・都市計画</option>
+                                                <option value="行財政改革">行財政改革</option>
+                                                <option value="教育・子育て">教育・子育て</option>
+                                                <option value="福祉・健康・医療">福祉・健康・医療</option>
+                                                <option value="経済・産業・観光">経済・産業・観光</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4 d-flex align-items-end">
+                                            <button class="btn btn-success btn-lg w-100" onclick="showFinalProposal(document.getElementById('bigcat-select').value)">
+                                                <i class="bi bi-arrow-repeat"></i> 最終提案を生成
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div id="final-proposal-text" class="mt-4 p-4 border rounded" style="white-space: pre-wrap; line-height: 1.9; min-height: 320px; background: #f8fafc; font-size: 11pt; color: #1e293b;">
+                                        上で大分類を選び、「最終提案を生成」ボタンを押してください。
+                                        
+                                        
+                                        1. AI原案：300字要約の前半部分
+                                        2. 市民の声：新統合された投稿の要約  
+                                        3. 反映説明：市民意見をどう反映したか100字で解説
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- ↑ここまで追加 ↑↑↑ -->
                  
                     </div>
                 </div>
