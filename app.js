@@ -34,14 +34,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnAiAnalysis) btnAiAnalysis.addEventListener("click", aiAnalysis);
     if (btnSubmitToBox) btnSubmitToBox.addEventListener("click", submitOpinion);
     
-    // ★修正: タブ3「届いた提案箱」をクリックしたら再描画
     const tabBtn = document.getElementById('list-tab-btn');
-if (tabBtn) {
-    tabBtn.addEventListener('shown.bs.tab', function() {
-        console.log('提案箱タブが表示された'); // ★追加3
-        renderProposalTree(allOpinions);
-    });
-}
+    if (tabBtn) {
+        tabBtn.addEventListener('shown.bs.tab', function() {
+            console.log('提案箱タブが表示された');
+            renderProposalTree(allOpinions);
+        });
+    }
 });
 
 async function aiAnalysis() {
@@ -59,6 +58,8 @@ async function aiAnalysis() {
             body: JSON.stringify({ action: "analyze", content: content })
         });
         const data = await res.json();
+        console.log('AI解析結果:', data); // ★デバッグ用
+        
         if (data.status !== "success") {
             alert(data.message || "AI解析に失敗しました");
             return;
@@ -68,6 +69,8 @@ async function aiAnalysis() {
         const big = CATEGORY_MASTER[r.bigCatId];
         const bigCatName = big ? big.name : "その他";
         const midCatName = big && big.mids[r.midCatId] ? big.mids[r.midCatId] : "その他";
+
+        console.log('分類結果:', r.bigCatId, '→', bigCatName, r.midCatId, '→', midCatName); // ★デバッグ用
 
         const setVal = (id, val) => {
             const el = document.getElementById(id);
@@ -86,8 +89,9 @@ async function aiAnalysis() {
 
         const summaryEl = document.getElementById("aiSummaryText");
         if (summaryEl) summaryEl.innerHTML = `
-<div class="mb-2"><span class="badge bg-info">大分類</span> ${escapeHtml(bigCatName)}</div>
+<div class="mb-2"><span class="badge bg-primary">大分類</span> ${escapeHtml(bigCatName)}</div>
 <div class="mb-3"><span class="badge bg-secondary">中分類</span> ${escapeHtml(midCatName)}</div>
+<hr>
 <b>核心</b><br>${escapeHtml(r["核心"])}<br><br>
 <b>期待される変化</b><br>${escapeHtml(r["変化"])}<br><br>
 <b>成功事例</b><br>${escapeHtml(r["成功事例"])}<br><br>
@@ -130,7 +134,7 @@ async function submitOpinion() {
         const res = await fetch(GAS_URL, {
             method: "POST",
             body: JSON.stringify({
-                action: "addOpinion",  // ★ここだけ修正: submit → addOpinion
+                action: "addOpinion",
                 title,
                 summary,
                 content,
@@ -146,6 +150,13 @@ async function submitOpinion() {
             await fetchOpinions();
             alert("提案を登録しました");
             clearForm();
+            
+            // ★追加: タブ3「届いた提案箱」へ自動移動
+            const listTabBtn = document.getElementById('list-tab-btn');
+            if (listTabBtn) {
+                const tab = new bootstrap.Tab(listTabBtn);
+                tab.show();
+            }
         } else {
             alert(data.message || "登録に失敗しました");
         }
@@ -156,7 +167,7 @@ async function submitOpinion() {
 }
 
 async function fetchOpinions() {
-    console.log('fetchOpinions開始'); // ★追加2
+    console.log('fetchOpinions開始');
     try {
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
@@ -172,14 +183,13 @@ async function fetchOpinions() {
 }
 
 function renderProposalTree(opinions) {
-    console.log('renderProposalTree開始:', opinions.length, '件'); // ★追加1
+    console.log('renderProposalTree開始:', opinions.length, '件');
     const container = document.getElementById("proposal-container");
     if (!container) {
         console.error('proposal-container not found');
         return;
     }
 
-    // 一旦全部消す
     container.innerHTML = '';
     container.style.cssText = 'font-size:10.5pt; width:100%; padding:20px 0;';
 
@@ -257,7 +267,6 @@ function renderProposalTree(opinions) {
         return;
     }
 
-    // イベント付与：これで確実に動く
     container.querySelectorAll('.big-toggle,.mid-toggle,.post-toggle').forEach(el => {
         el.addEventListener('click', function(e) {
             e.stopPropagation();
