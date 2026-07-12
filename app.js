@@ -171,6 +171,7 @@ async function fetchOpinions() {
 }
 
 function renderProposalTree(opinions) {
+    console.log('renderProposalTree開始:', opinions.length, '件'); // ★追加1
     const container = document.getElementById("proposal-container");
     if (!container) {
         console.error('proposal-container not found');
