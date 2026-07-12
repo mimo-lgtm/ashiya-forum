@@ -226,14 +226,22 @@ async function fetchOpinions() {
     try {
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
-        if (data.status!== "success") {
-            console.error(data.message);
-            return;
+
+        // GASが配列で返してくる場合と、{status, opinions}で返す場合の両対応
+        if (Array.isArray(data)) {
+            allOpinions = data;
+        } else if (data.status === "success") {
+            allOpinions = data.opinions || [];
+        } else {
+            console.error('GASエラー:', data.message || data);
+            allOpinions = [];
         }
-        allOpinions = data.opinions || [];
+
         renderProposalTree(allOpinions);
     } catch (err) {
-        console.error(err);
+        console.error('通信エラー:', err);
+        allOpinions = [];
+        renderProposalTree(allOpinions);
     }
 }
 
