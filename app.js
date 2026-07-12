@@ -148,7 +148,45 @@ async function submitOpinion() {
     alert("登録失敗: " + data.message);
   }
 }
+async function generateFinalProposal() {
+  const originalContent = document.getElementById("content").value.trim();
+  const bigCatName = document.getElementById("bigCatName").value.trim();
 
+  if (!originalContent ||!bigCatName) {
+    return alert("先にAI壁打ちを実行してください");
+  }
+
+  document.getElementById("generateFinalBtn").disabled = true;
+  document.getElementById("generateFinalBtn").textContent = "生成中...";
+
+  try {
+    const res = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "generateFinal",
+        originalContent,
+        bigCatName
+      })
+    });
+    const data = await res.json();
+
+    if (data.status === "success") {
+      document.getElementById("finalProposalText").innerHTML = `
+        ${data.result}
+        <div style="margin-top: 8px; font-size: 11px; color: #6b7280;">
+          ※市民の声 ${data.citizenCount}件を統合
+        </div>
+      `;
+    } else {
+      alert("生成失敗: " + data.message);
+    }
+  } catch (err) {
+    alert("エラー: " + err.message);
+  } finally {
+    document.getElementById("generateFinalBtn").disabled = false;
+    document.getElementById("generateFinalBtn").textContent = "最終提案を生成";
+  }
+}
 async function fetchOpinions() {
     try {
         const res = await fetch(GAS_URL + "?action=get");
