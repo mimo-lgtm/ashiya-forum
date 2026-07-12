@@ -70,6 +70,11 @@
         <div class="form-group">
           <label for="content">提案内容 *</label>
           <textarea id="content" placeholder="芦屋市への提案やアイデアを自由に記入してください。&#10;&#10;例：駅前の歩道が狭くて危険です。ベビーカーや車椅子が通れるように拡幅し、緑陰のある休憩スペースを設置してはどうでしょうか。"></textarea>
+       <input type="hidden" id="title">
+<input type="hidden" id="summary">
+<input type="hidden" id="bigCat">
+<input type="hidden" id="smallCat">
+<input type="hidden" id="aiJson">
         </div>
 
         <div style="padding: 16px; background: #eff6ff; border-radius: 8px; border-left: 4px solid #2563eb; margin-bottom: 20px;">
@@ -85,6 +90,7 @@
 
         <button onclick="submitOpinion()" id="submitBtn" style="margin-top: 20px; width: 100%; padding: 14px; font-size: 16px;">提案を登録する</button>
         <div id="submitStatus"></div>
+        <div id="proposalStatus"></div>
       </div>
     </div>
 
@@ -110,26 +116,19 @@
     </div>
 
     <!-- アイデアの地図タブ -->
-    <div id="map-tab" class="tab-content">
-      <div style="max-width: 1000px; margin: 0 auto;">
-        <h2 style="margin-bottom: 28px;">アイデアの地図：5分類の現状認識</h2>
-        <div id="baseSummaryContainer"></div>
-        <div id="finalProposalSection" style="margin-top: 48px; padding: 32px; border: 3px solid #2563eb; border-radius: 16px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">
-          <h3 style="margin: 0 0 12px 0; color: #1e40af; font-size: 22px;">最終提案：市民との共創版</h3>
-          <p style="font-size: 14px; color: #1e40af; margin: 0 0 20px 0; line-height: 1.7;">
-            「提案作成」タブで入力した元の提案と、同大分類の市民の声をAIが統合し、<br>300字の政策提言として生成します
-          </p>
-          <div id="finalProposalText" style="min-height: 160px; padding: 24px; background: white; border-radius: 12px; margin: 20px 0; font-size: 16px; line-height: 1.9; border: 2px solid #bfdbfe; color: #1f2937; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);">
-            <span style="color: #9ca3af;">「最終提案を生成」ボタンを押すと表示されます</span>
-          </div>
-          <button id="generateFinalBtn" onclick="generateFinalProposal()" style="background: #2563eb; color: white; padding: 16px 32px; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 700; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);">
-            最終提案を生成
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+<div id="map-tab" class="tab-content">
 
-  <script src="app.js"></script>
+  <h2>📦 提案箱</h2>
+
+  <p style="margin-bottom:20px;color:#666;">
+    AIが自動分類・自動統合した市民提案
+  </p>
+
+  <div id="proposal-container"></div>
+
+</div>
+
+<script src="proposal-tree.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
