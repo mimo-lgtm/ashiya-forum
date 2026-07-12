@@ -360,3 +360,20 @@ body {
 #proposal-container .tree-post-body {
   display: none !important;
 }
+/* ステータス色分け */
+.tree-post.status-new { border-left-color: #3b82f6!important; background: #eff6ff; }
+.tree-post.status-merged { border-left-color: #f59e0b!important; background: #fffbeb; }
+.tree-post.status-original { border-left-color: #64748b!important; background: #f8fafc; }
+
+.status-new::before { content: "🆕 新提案 "; font-weight: 700; color: #1d4ed8; }
+.status-merged::before { content: "⭐ 新統合 "; font-weight: 700; color: #b45309; }
+.status-original::before { content: "📄 元記事 "; font-weight: 700; color: #475569; }
+
+/* 自分の投稿パネル */
+.my-post-item { padding: 12px; margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
+.my-post-title { font-weight: 600; margin-bottom: 4px; }
+.my-post-location { font-size: 9pt; color: #64748b; }
+.my-post-status { font-size: 9pt; margin-top: 4px; font-weight: 600; }
+.my-post-item.status-new.my-post-status { color: #1d4ed8; }
+.my-post-item.status-merged.my-post-status { color: #b45309; }
+.my-post-item.status-original.my-post-status { color: #475569; }
