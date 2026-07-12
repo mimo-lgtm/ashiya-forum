@@ -1,4 +1,4 @@
-const GAS_URL = "あなたのGAS WebアプリURL";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwfYPef4DCgrU7Bd9GeCJtHd1KSEAzS03jXEuPSpEJ-IVcWqiJUu5arX9lY4I883IliNA/exec";
 
 let aiAnalysisJson = "";
 let currentBigCat = "";
