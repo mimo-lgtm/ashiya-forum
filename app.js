@@ -1,364 +1,393 @@
-// グローバル変数。2重読み込み対策済み
-var GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycby_OQ5DcuYRTVJ2xgHGB88oQJHA0lzrjpG1eFD5Q6Aa0A_vf5h5cZjEUbn6k623ojibvg/exec";
-var allOpinions = window.allOpinions || [];
+// ========================================
+// 設定
+// ========================================
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzYOUR_GAS_ID/exec"; // ★必ず変更
 
+// 大分類マスター
 const CATEGORY_MASTER = {
-  "BIG-1": { 
-    name: "まちづくり・都市計画（住みやすさの基盤）", 
-    mids: { "MID-1": "住宅・まちなみ", "MID-2": "交通・移動手段", "MID-3": "公園・緑地・景観", "MID-4": "防災・レジリエンス", "MID-5": "その他" } 
+  "BIG-1": {
+    name: "まちづくり・都市計画",
+    small: ["都市計画・再開発", "公園・緑地", "道路・交通インフラ", "防災・防犯", "景観・街並み", "住宅政策"]
   },
-  "BIG-2": { 
-    name: "子育て・教育環境（次世代を育てるまち）", 
-    mids: { "MID-1": "保育・教育施設", "MID-2": "子ども・若者の居場所", "MID-3": "学びの機会（生涯学習）", "MID-4": "家族支援", "MID-5": "その他" } 
+  "BIG-2": {
+    name: "子育て・教育",
+    small: ["保育・幼児教育", "学校教育", "青少年育成", "子育て支援", "特別支援教育", "社会教育"]
   },
-  "BIG-3": { 
-    name: "福祉・健康・共生（誰も取り残さないまち）", 
-    mids: { "MID-1": "高齢者支援", "MID-2": "障害者・多様な人々の支援", "MID-3": "健康づくり", "MID-4": "地域コミュニティ", "MID-5": "その他" } 
+  "BIG-3": {
+    name: "福祉・健康・共生",
+    small: ["高齢者福祉", "障害者福祉", "医療・健康", "地域共生", "生活困窮者支援", "男女共同参画"]
   },
-  "BIG-4": { 
-    name: "環境・持続可能性（未来に繋ぐ芦屋）", 
-    mids: { "MID-1": "気候変動対策", "MID-2": "資源循環・ごみ問題", "MID-3": "自然環境保全", "MID-4": "エネルギー・脱炭素", "MID-5": "その他" } 
+  "BIG-4": {
+    name: "環境・持続可能性",
+    small: ["ごみ・リサイクル", "エネルギー・温暖化対策", "自然保護・生物多様性", "公害対策", "環境学習", "気候変動適応"]
   },
-  "BIG-5": { 
-    name: "行政・市民参加・活力（未来を拓く力）", 
-    mids: { "MID-1": "行政の透明性・効率化", "MID-2": "市民参加・協働", "MID-3": "文化・芸術・スポーツ", "MID-4": "産業・雇用・にぎわい", "MID-5": "その他" } 
+  "BIG-5": {
+    name: "行政・市民参加・活力",
+    small: ["市民協働・参画", "行財政改革", "産業・雇用", "文化・スポーツ", "観光・交流", "DX・デジタル化"]
   }
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-    // 初回読み込み
-    fetchOpinions();
-    
-    const btnAiAnalysis = document.getElementById("btnAiAnalysis");
-    const btnSubmitToBox = document.getElementById("btnSubmitToBox");
-    if (btnAiAnalysis) btnAiAnalysis.addEventListener("click", aiAnalysis);
-    if (btnSubmitToBox) btnSubmitToBox.addEventListener("click", submitOpinion);
-    
-    // ★修正: タブ3「届いた提案箱」をクリックしたら再描画
-    const listTabBtn = document.getElementById('list-tab-btn');
-    if (listTabBtn) {
-        listTabBtn.addEventListener('shown.bs.tab', () => {
-            console.log('提案箱タブが表示された');
-            renderProposalTree(allOpinions);
-        });
-    }
+// AI固定要約300字 × 5分類：管理者が事前作成
+const AI_BASE_SUMMARY = {
+  "BIG-1": "まちづくり・都市計画の現状：芦屋市では高経年マンションの建替え需要が顕在化しており、南芦屋浜地区の再開発と既成市街地の景観保全の両立が課題です。阪神間の住宅都市として、JR芦屋駅・阪神芦屋駅周辺の歩行者空間再編、自転車走行環境整備、緑地の質向上が求められています。防災面では南海トラフ地震を想定した津波避難対策、土砂災害警戒区域の対策、密集市街地の耐震化促進が急務です。市民参加型の都市計画マスタープラン策定が進行中で、地域特性を活かしたまちづくりが模索されています。",
+  "BIG-2": "子育て・教育環境の現状：待機児童は解消傾向にあるものの、保育の質向上と多様な保育ニーズへの対応が課題です。小中学校では35人学級が実現し、1人1台端末によるICT教育環境も整備されましたが、教員の働き方改革と不登校児童生徒への支援体制充実が求められています。放課後児童クラブの待機解消、医療的ケア児支援、ひとり親家庭支援、子育て世帯の孤立防止が重点施策です。芦屋市教育大綱では「自立と共生」を理念に掲げ、探究的な学びを推進しています。",
+  "BIG-3": "福祉・健康・共生の現状：高齢化率28%に達し、2040年には35%を超える見込みです。要介護認定者数が増加する中、介護人材不足が深刻化しており、地域包括ケアシステムの深化と介護予防の推進が急務です。障害者の社会参加促進、認知症施策の推進、生活困窮者自立支援、ひきこもり支援の強化が図られています。健康寿命延伸に向け、特定健診受診率向上、がん検診推進、フレイル予防に取り組んでいます。多文化共生、性的マイノリティ支援、男女共同参画も重要課題として位置づけられています。",
+  "BIG-4": "環境・持続可能性の現状：2050年カーボンニュートラル達成に向け、公共施設のZEB化推進と住宅用太陽光発電・蓄電池補助を拡充しています。ごみ総量は微減傾向ですが、プラスチック資源循環法への対応強化が必要です。芦屋川・六甲山系の自然環境保全と生物多様性保全が重要課題で、外来種対策も進めています。気候変動適応策として、熱中症対策、豪雨災害への備え、グリーンインフラ整備を強化しています。環境学習センターを拠点とした環境教育と、市民・事業者との協働による環境まちづくりを推進しています。",
+  "BIG-5": "行政・市民参加・活力の現状：人口減少と生産年齢人口減により将来的な税収減が見込まれる中、行財政改革と公共施設マネジメントの推進が急務です。市民協働では、まちづくり協議会やNPOとの連携を強化していますが、若年層や現役世代の市政参加促進が課題です。DX推進により、マイナンバーカードを活用した行政手続きのオンライン化、キャッシュレス決済導入を進めています。産業面では起業支援、商店街活性化、テレワーク環境整備に取り組んでいます。文化面では芦屋市立美術博物館を核とした文化創造都市を目指し、スポーツ振興も図っています。"
+};
+
+// グローバル変数
+let currentUserId = null;
+
+// ========================================
+// 初期化
+// ========================================
+document.addEventListener('DOMContentLoaded', () => {
+  initUserId();
+  initTabs();
+  initFilters();
+  fetchOpinions();
 });
 
-async function aiAnalysis() {
-    const contentEl = document.getElementById("content");
-    if (!contentEl) return alert("contentが見つかりません");
-    const content = contentEl.value.trim();
-    if (!content) {
-        alert("内容を入力してください。");
-        return;
-    }
-
-    try {
-        const res = await fetch(GAS_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "analyze", content: content })
-        });
-        const data = await res.json();
-        if (data.status !== "success") {
-            alert(data.message || "AI解析に失敗しました");
-            return;
-        }
-
-        const r = data.result;
-
-// ★デバッグ：AIが生で何返してるか確認
-console.log("AI生データ:", r.bigCatId, r.midCatId);
-
-const big = CATEGORY_MASTER[r.bigCatId];
-const bigCatName = big ? big.name : "不明な大分類";
-
-// ★ここ重要：midCatIdが無効ならbigCatIdのMID-1にフォールバック
-let midCatName = "その他";
-if (big && big.mids) {
-  midCatName = big.mids[r.midCatId] || big.mids["MID-1"] || "その他";
-}
-
-console.log("分類変換結果:", bigCatName, midCatName); // ★これで確認
-
-document.getElementById("title").value = r["推奨タイトル"];
-document.getElementById("summary").value = r["要約200"];
-document.getElementById("bigCatName").value = bigCatName;
-document.getElementById("midCatName").value = midCatName; // ★ここ
-
-        const titleEl = document.getElementById("aiTitleText");
-        if (titleEl) titleEl.textContent = r["推奨タイトル"] || "";
-
-        const refinedEl = document.getElementById("aiRefinedText");
-        if (refinedEl) refinedEl.textContent = r["要約200"] || "";
-
-        const summaryEl = document.getElementById("aiSummaryText");
-        if (summaryEl) summaryEl.innerHTML = `
-<div class="mb-2"><span class="badge bg-info">大分類</span> ${escapeHtml(bigCatName)}</div>
-<div class="mb-3"><span class="badge bg-secondary">中分類</span> ${escapeHtml(midCatName)}</div>
-<b>核心</b><br>${escapeHtml(r["核心"])}<br><br>
-<b>期待される変化</b><br>${escapeHtml(r["変化"])}<br><br>
-<b>成功事例</b><br>${escapeHtml(r["成功事例"])}<br><br>
-<b>懸念点</b><br>${escapeHtml(r["懸念点"])}<br><br>
-<b>AIからの問い</b><br>${escapeHtml(r["問い"])}
-`;
-
-        document.getElementById("aiPlaceholder")?.classList.add("d-none");
-        document.getElementById("aiAssistBox")?.classList.remove("d-none");
-
-    } catch (err) {
-        console.error(err);
-        alert("AI通信エラー");
-    }
-}
-
-async function submitOpinion() {
-  const title = document.getElementById("title").value.trim();
-  const summary = document.getElementById("summary").value.trim();
-  const content = document.getElementById("content").value.trim();
-  const bigCatName = document.getElementById("bigCatName").value.trim();
-  const midCatName = document.getElementById("midCatName").value.trim();
-  const author = document.getElementById("author").value.trim();
-
-  if (!title || !bigCatName) return alert("先にAI壁打ちを実行してください");
-
-  // ★AI分析結果を丸ごと取る
-  const aiJsonText = document.getElementById("aiSummaryText").dataset.json || "{}";
-  
-  const res = await fetch(GAS_URL, {
-    method: "POST",
-    body: JSON.stringify({ 
-      action: "submit",  // あなたの330行版はsubmitのはず
-      title, 
-      summary, 
-      content, 
-      bigCatName, 
-      midCatName, 
-      author,
-      aiJson: JSON.parse(aiJsonText) // ★M列用に追加
-    })
-  });
-  const data = await res.json();
-
-  if (data.status === "success") {
-    await fetchOpinions();
-    alert("提案を登録しました");
-    clearForm();
-    document.getElementById('list-tab-btn')?.click();
-  } else {
-    alert("登録失敗: " + data.message);
+// ユーザーID初期化
+function initUserId() {
+  currentUserId = localStorage.getItem('ashiya_user_id');
+  if (!currentUserId) {
+    currentUserId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('ashiya_user_id', currentUserId);
   }
 }
+
+// タブ切り替え初期化
+function initTabs() {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      e.target.classList.add('active');
+      const tabId = e.target.id.replace('-btn', '');
+      document.getElementById(tabId).classList.add('active');
+      if (tabId === 'map-tab') renderBaseSummary();
+      if (tabId === 'list-tab') fetchOpinions();
+    });
+  });
+}
+
+// フィルター初期化
+function initFilters() {
+  const bigSelect = document.getElementById('filterBigCat');
+  Object.keys(CATEGORY_MASTER).forEach(bigId => {
+    const opt = document.createElement('option');
+    opt.value = CATEGORY_MASTER[bigId].name;
+    opt.textContent = CATEGORY_MASTER[bigId].name;
+    bigSelect.appendChild(opt);
+  });
+
+  bigSelect.addEventListener('change', (e) => {
+    const smallSelect = document.getElementById('filterSmallCat');
+    smallSelect.innerHTML = '<option value="">すべての中分類</option>';
+    const selectedBig = Object.values(CATEGORY_MASTER).find(c => c.name === e.target.value);
+    if (selectedBig) {
+      selectedBig.small.forEach(small => {
+        const opt = document.createElement('option');
+        opt.value = small;
+        opt.textContent = small;
+        smallSelect.appendChild(opt);
+      });
+    }
+  });
+}
+
+// ========================================
+// 提案作成タブ
+// ========================================
+
+// AI壁打ち実行
+async function aiAnalysis() {
+  const content = document.getElementById("content").value.trim();
+  const bigCatName = document.getElementById("bigCatName").value.trim();
+
+  if (!content) {
+    showStatus('submitStatus', '提案内容を入力してください', 'error');
+    return;
+  }
+  if (!bigCatName) {
+    showStatus('submitStatus', '大分類名を入力してください', 'error');
+    return;
+  }
+
+  const btn = document.getElementById("aiAnalysisBtn");
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading"></span> AI分析中...';
+  document.getElementById("aiResult").innerHTML = '<span style="color: #6b7280;">AI分析中...</span>';
+
+  try {
+    const res = await fetch(GAS_URL, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: "analyze",
+        content,
+        bigCatName,
+        userId: currentUserId
+      })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    if (data.status === "success") {
+      document.getElementById("aiResult").innerHTML = data.result;
+    } else {
+      document.getElementById("aiResult").innerHTML = `<span style="color: #dc2626;">エラー: ${escapeHtml(data.message)}</span>`;
+    }
+  } catch (err) {
+    console.error('AI Analysis Error:', err);
+    document.getElementById("aiResult").innerHTML = `<span style="color: #dc2626;">通信エラー: ${escapeHtml(err.message)}</span>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+// 提案登録
+async function submitOpinion() {
+  const content = document.getElementById("content").value.trim();
+  const bigCatName = document.getElementById("bigCatName").value.trim();
+
+  if (!content ||!bigCatName) {
+    showStatus('submitStatus', '提案内容と大分類を入力してください', 'error');
+    return;
+  }
+
+  const btn = document.getElementById("submitBtn");
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "登録中...";
+
+  try {
+    const res = await fetch(GAS_URL, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: "submit",
+        content,
+        bigCatName,
+        userId: currentUserId
+      })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    if (data.status === "success") {
+      showStatus('submitStatus', '提案を登録しました！', 'success');
+      document.getElementById("content").value = "";
+      document.getElementById("bigCatName").value = "";
+      document.getElementById("aiResult").innerHTML = '<span style="color: #9ca3af;">「AI壁打ち実行」を押すと、AIが分類提案と改善アドバイスを表示します</span>';
+      setTimeout(() => {
+        document.getElementById('list-tab-btn').click();
+      }, 1500);
+    } else {
+      showStatus('submitStatus', `登録失敗: ${data.message}`, 'error');
+    }
+  } catch (err) {
+    console.error('Submit Error:', err);
+    showStatus('submitStatus', `通信エラー: ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+// ========================================
+// 提案一覧タブ
+// ========================================
+
+// 提案一覧取得
+async function fetchOpinions() {
+  const list = document.getElementById("opinionsList");
+  list.innerHTML = '<span style="color: #6b7280;"><span class="loading"></span> 読み込み中...</span>';
+
+  const bigCat = document.getElementById("filterBigCat").value;
+  const smallCat = document.getElementById("filterSmallCat").value;
+  const sortBy = document.getElementById("sortBy").value;
+
+  try {
+    const url = new URL(GAS_URL);
+    url.searchParams.append('action', 'list');
+    url.searchParams.append('userId', currentUserId);
+    if (bigCat) url.searchParams.append('bigCat', bigCat);
+    if (smallCat) url.searchParams.append('smallCat', smallCat);
+    if (sortBy) url.searchParams.append('sortBy', sortBy);
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+      if (data.opinions && data.opinions.length > 0) {
+        list.innerHTML = data.opinions.map(op => `
+          <div class="opinion-item">
+            <div class="opinion-meta">
+              <span class="badge badge-blue">${escapeHtml(op.big_category)}</span>
+              <span class="badge badge-green">${escapeHtml(op.small_category)}</span>
+              <span>${new Date(op.created_at).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+              <span>👍 ${op.like_count || 0}</span>
+            </div>
+            <div class="opinion-content">${escapeHtml(op.content)}</div>
+            <button class="like-btn ${op.user_liked? 'liked' : ''}" onclick="toggleLike('${op.id}', ${op.user_liked})">
+              ${op.user_liked? '❤️ いいね済み' : '🤍 いいね'} (${op.like_count || 0})
+            </button>
+          </div>
+        `).join('');
+      } else {
+        list.innerHTML = '<div style="text-align: center; padding: 40px; color: #9ca3af;">提案がありません</div>';
+      }
+    } else {
+      list.innerHTML = `<div class="status-message status-error">エラー: ${escapeHtml(data.message)}</div>`;
+    }
+  } catch (err) {
+    console.error('Fetch Opinions Error:', err);
+    list.innerHTML = `<div class="status-message status-error">通信エラー: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+// いいね切り替え
+async function toggleLike(opinionId, currentlyLiked) {
+  try {
+    const res = await fetch(GAS_URL, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: "toggleLike",
+        opinionId,
+        like:!currentlyLiked,
+        userId: currentUserId
+      })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    if (data.status === "success") {
+      fetchOpinions();
+    } else {
+      alert(`エラー: ${data.message}`);
+    }
+  } catch (err) {
+    console.error('Toggle Like Error:', err);
+    alert(`通信エラー: ${err.message}`);
+  }
+}
+
+// ========================================
+// アイデアの地図タブ
+// ========================================
+
+// 5分類を表示
+function renderBaseSummary() {
+  const container = document.getElementById("baseSummaryContainer");
+  if (!container) return;
+
+  let html = "";
+  Object.keys(CATEGORY_MASTER).forEach(bigId => {
+    const bigName = CATEGORY_MASTER[bigId].name;
+    const summary = AI_BASE_SUMMARY[bigId] || "要約未設定";
+    const smallCats = CATEGORY_MASTER[bigId].small.map(s => `<span class="badge badge-purple" style="margin: 2px;">${s}</span>`).join('');
+
+    html += `
+      <div class="card">
+        <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 18px; display: flex; align-items: center; gap: 10px;">
+          <span class="badge badge-blue" style="font-size: 13px;">${bigId}</span>
+          ${bigName}
+        </h4>
+        <p style="margin: 0 0 12px 0; font-size: 15px; line-height: 1.9; color: #374151;">${summary}</p>
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
+          <div style="font-size: 12px; color: #6b7280; margin-bottom: 6px; font-weight: 600;">中分類:</div>
+          <div>${smallCats}</div>
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+// 最終提案生成
 async function generateFinalProposal() {
   const originalContent = document.getElementById("content").value.trim();
   const bigCatName = document.getElementById("bigCatName").value.trim();
 
   if (!originalContent ||!bigCatName) {
-    return alert("先にAI壁打ちを実行してください");
+    alert("先に「提案作成」タブで提案内容を入力し、AI壁打ちを実行してください");
+    document.getElementById('create-tab-btn').click();
+    return;
   }
 
-  document.getElementById("generateFinalBtn").disabled = true;
-  document.getElementById("generateFinalBtn").textContent = "生成中...";
+  const btn = document.getElementById("generateFinalBtn");
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading"></span> 生成中...';
+
+  document.getElementById("finalProposalText").innerHTML = '<span style="color: #6b7280;"><span class="loading"></span> AIが市民の声を統合して300字の政策提言を生成中...</span>';
 
   try {
     const res = await fetch(GAS_URL, {
       method: "POST",
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         action: "generateFinal",
         originalContent,
-        bigCatName
+        bigCatName,
+        userId: currentUserId
       })
     });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
     const data = await res.json();
 
     if (data.status === "success") {
       document.getElementById("finalProposalText").innerHTML = `
-        ${data.result}
-        <div style="margin-top: 8px; font-size: 11px; color: #6b7280;">
-          ※市民の声 ${data.citizenCount}件を統合
+        ${escapeHtml(data.result)}
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 2px solid #e5e7eb; font-size: 13px; color: #6b7280; display: flex; align-items: center; gap: 8px;">
+          <span class="badge badge-orange">統合済み</span>
+          同大分類の市民の声 ${data.citizenCount || 0}件を統合して生成
         </div>
       `;
     } else {
-      alert("生成失敗: " + data.message);
+      document.getElementById("finalProposalText").innerHTML = `<span style="color: #dc2626;">生成失敗: ${escapeHtml(data.message)}</span>`;
     }
   } catch (err) {
-    alert("エラー: " + err.message);
+    console.error('Generate Final Proposal Error:', err);
+    document.getElementById("finalProposalText").innerHTML = `<span style="color: #dc2626;">通信エラー: ${escapeHtml(err.message)}</span>`;
   } finally {
-    document.getElementById("generateFinalBtn").disabled = false;
-    document.getElementById("generateFinalBtn").textContent = "最終提案を生成";
+    btn.disabled = false;
+    btn.textContent = originalText;
   }
 }
-async function fetchOpinions() {
-    try {
-        const res = await fetch(GAS_URL + "?action=get");
-        const data = await res.json();
-        if (data.status !== "success") {
-            console.error(data.message);
-            return;
-        }
-        allOpinions = data.opinions || [];
-        renderProposalTree(allOpinions);
-    } catch (err) {
-        console.error(err);
-    }
-}
 
-function renderProposalTree(opinions) {
-    const container = document.getElementById("proposal-container");
-    if (!container) {
-        console.error('proposal-container not found');
-        return;
-    }
+// ========================================
+// ユーティリティ
+// ========================================
 
-    // 一旦全部消す
-    container.innerHTML = '';
-    container.style.cssText = 'font-size:10.5pt; width:100%; padding:20px 0;';
-
-    let totalCount = 0;
-
-    Object.keys(CATEGORY_MASTER).forEach((bigId) => {
-        const big = CATEGORY_MASTER[bigId].name;
-        const mids = CATEGORY_MASTER[bigId].mids;
-        let bigHtml = "";
-        let bigCount = 0;
-
-        Object.keys(mids).forEach((midId) => {
-            const mid = mids[midId];
-            const matched = opinions.filter(o => {
-                const oBig = (o.bigCatName || "").trim();
-                const oMid = (o.midCatName || "").trim();
-                const bigMatch = oBig.includes(big.split('（')[0]) || big.includes(oBig.split('（')[0]);
-                const midMatch = oMid === mid || oMid.includes(mid) || mid.includes(oMid);
-                return bigMatch && midMatch;
-            });
-
-            if (matched.length === 0) return;
-            bigCount += matched.length;
-
-            let postsHtml = '';
-            matched.forEach((post) => {
-                let icon = "📝";
-                let borderColor = '#94a3b8';
-                if (post.status == "新統合") { icon = "⭐"; borderColor = '#f59e0b'; }
-                if (post.status == "元記事") { icon = "📄"; borderColor = '#64748b'; }
-
-                postsHtml += `
-                    <div style="margin:6px 0; padding:10px 12px; border-left:3px solid ${borderColor}; background:#fff; border-radius:4px;">
-                        <div class="post-toggle" style="cursor:pointer; font-weight:600; color:#1e293b;">
-                            ${icon} ${escapeHtml(post.title)}
-                        </div>
-                        <div class="post-content" style="display:none; padding:10px; margin-top:8px; background:#f8fafc; border-radius:6px; font-size:10pt; line-height:1.7;">
-                            <div style="color:#475569; white-space:pre-wrap;">${escapeHtml(post.summary)}</div>
-                            ${post.status == "元記事"? `<div style="margin-top:6px; font-size:9pt; color:#64748b; font-style:italic;">統合先：${escapeHtml(post.mergeTitle)}</div>` : ""}
-                        </div>
-                    </div>
-                `;
-            });
-
-            bigHtml += `
-                <div style="margin-bottom:8px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;">
-                    <div class="mid-toggle" style="padding:10px 14px; background:#f1f5f9; color:#334155; font-weight:600; cursor:pointer; user-select:none;">
-                        ▶ ${escapeHtml(mid)} (${matched.length})
-                    </div>
-                    <div class="mid-content" style="display:none; padding:8px 12px;">
-                        ${postsHtml}
-                    </div>
-                </div>
-            `;
-        });
-
-        if (bigCount > 0) {
-            totalCount += bigCount;
-            const bigEl = document.createElement('div');
-            bigEl.style.cssText = 'margin-bottom:12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05);';
-            bigEl.innerHTML = `
-                <div class="big-toggle" style="padding:14px 18px; background:linear-gradient(90deg, #e0f2fe, #f0f9ff); color:#0c4a6e; font-weight:700; cursor:pointer; user-select:none;">
-                    ▶ ${escapeHtml(big)} (${bigCount})
-                </div>
-                <div class="big-content" style="display:none; padding:12px 16px; background:#f8fafc; border-top:1px solid #e2e8f0;">
-                    ${bigHtml}
-                </div>
-            `;
-            container.appendChild(bigEl);
-        }
-    });
-
-    if (totalCount === 0) {
-        container.innerHTML = '<p style="padding:12px; color:#64748b;">表示できる提案がありません</p>';
-        return;
-    }
-
-    // イベント付与：これで確実に動く
-    container.querySelectorAll('.big-toggle,.mid-toggle,.post-toggle').forEach(el => {
-        el.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const content = this.nextElementSibling;
-            if (!content) return;
-            const isOpen = content.style.display === 'block';
-            content.style.display = isOpen? 'none' : 'block';
-            this.innerHTML = this.innerHTML.replace(isOpen? '▼' : '▶', isOpen? '▶' : '▼');
-        });
-    });
-
-    console.log('描画完了:', totalCount, '件');
-}
-
-// toggleTree関数はもう使わないので削除でOK
-
-function toggleTree(element) {
-    const body = element.nextElementSibling;
-    if (!body) return;
-
-    const isOpen = body.style.display === 'block';
-
-    if (isOpen) {
-        body.style.display = "none";
-        element.innerHTML = element.innerHTML.replace("▼", "▶");
-    } else {
-        body.style.display = "block";
-        element.innerHTML = element.innerHTML.replace("▶", "▼");
-    }
-}
-function toggleTree(element) {
-    const body = element.nextElementSibling;
-    if (!body) return;
-
-    const isOpen = body.style.display === 'block';
-
-    if (isOpen) {
-        body.style.display = "none";
-        element.innerHTML = element.innerHTML.replace("▼", "▶");
-    } else {
-        body.style.display = "block";
-        element.innerHTML = element.innerHTML.replace("▶", "▼");
-    }
-}
-
-function toggleTree(element) {
-    const body = element.nextElementSibling;
-    if (!body) return;
-    
-    const currentDisplay = window.getComputedStyle(body).display;
-    const isOpen = currentDisplay !== 'none';
-    
-    if (isOpen) {
-        body.style.display = "none";
-        element.innerHTML = element.innerHTML.replace("▼", "▶");
-    } else {
-        body.style.display = "block";
-        element.innerHTML = element.innerHTML.replace("▶", "▼");
-    }
-}
-
-function clearForm() {
-    ["title","summary","content","bigCatName","midCatName","author"].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = "";
-    });
-    document.getElementById("aiPlaceholder")?.classList.remove("d-none");
-    document.getElementById("aiAssistBox")?.classList.add("d-none");
-}
-
+// HTMLエスケープ
 function escapeHtml(text) {
-    if (!text) return "";
-    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ステータスメッセージ表示
+function showStatus(elementId, message, type) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  el.className = `status-message status-${type}`;
+  el.textContent = message;
+  setTimeout(() => {
+    el.textContent = '';
+    el.className = '';
+  }, 4000);
 }
