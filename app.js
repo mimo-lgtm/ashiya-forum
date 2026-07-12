@@ -199,14 +199,9 @@ function renderProposalTree(opinions) {
             bigCount += matched.length;
 
             let postsHtml = "";
-            matched.forEach(post => {
-                let icon = "📝";
-                let borderColor = "#94a3b8";
+matched.forEach(post => {
 
-                if (post.status === "新統合") { icon = "⭐"; borderColor = "#f59e0b"; }
-                if (post.status === "元記事") { icon = "📄"; borderColor = "#64748b"; }
-
-                postsHtml += `
+    postsHtml += `
 <div style="margin:6px 0; padding:10px 12px; border-left:3px solid ${borderColor}; background:#fff; border-radius:4px;">
   <div class="post-toggle" style="cursor:pointer; font-weight:600; color:#1e293b;">
     ${icon} ${escapeHtml(post.title)}
@@ -227,3 +222,4 @@ function renderProposalTree(opinions) {
   </div>
 </div>
 `;
+});
