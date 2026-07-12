@@ -20,7 +20,9 @@ const AI_BASE_SUMMARY = {
 };
 
 let currentUserId = null;
-let uploadedImageBase64 = null;
+let tempAiAnalysisJson = null;
+let currentBigCat = null;
+let currentSmallCat = null;
 
 // ========================================
 // 初期化
@@ -79,42 +81,12 @@ function initFilters() {
 }
 
 // ========================================
-// 画像プレビュー
-// ========================================
-function previewImage(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    uploadedImageBase64 = e.target.result;
-    document.getElementById('imagePreview').src = uploadedImageBase64;
-    document.getElementById('imagePreview').style.display = 'block';
-    document.getElementById('clearImageBtn').style.display = 'inline-block';
-  };
-  reader.readAsDataURL(file);
-}
-
-function clearImage() {
-  uploadedImageBase64 = null;
-  document.getElementById('imageFile').value = '';
-  document.getElementById('imagePreview').style.display = 'none';
-  document.getElementById('clearImageBtn').style.display = 'none';
-}
-
-// ========================================
 // 提案作成タブ
 // ========================================
 async function aiAnalysis() {
   const content = document.getElementById("content").value.trim();
-  const bigCatName = document.getElementById("bigCatName").value;
-
   if (!content) {
     showStatus('submitStatus', '提案内容を入力してください', 'error');
-    return;
-  }
-  if (!bigCatName) {
-    showStatus('submitStatus', '大分類を選択してください', 'error');
     return;
   }
 
@@ -127,12 +99,11 @@ async function aiAnalysis() {
   try {
     const res = await fetch(GAS_URL, {
       method: "POST",
-      headers: { 'Content-Type': 'application/json' },
+      mode: 'cors',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({
         action: "analyze",
         content,
-        bigCatName,
-        imageBase64: uploadedImageBase64,
         userId: currentUserId
       })
     });
@@ -142,8 +113,9 @@ async function aiAnalysis() {
 
     if (data.status === "success") {
       document.getElementById("aiResult").innerHTML = data.result;
-      // AI分析結果を一時保存
-      window.tempAiAnalysisJson = data.aiAnalysisJson;
+      tempAiAnalysisJson = data.aiAnalysisJson;
+      currentBigCat = data.bigCat;
+      currentSmallCat = data.smallCat;
     } else {
       document.getElementById("aiResult").innerHTML = `<span style="color: #dc2626;">エラー: ${escapeHtml(data.message)}</span>`;
     }
@@ -158,10 +130,13 @@ async function aiAnalysis() {
 
 async function submitOpinion() {
   const content = document.getElementById("content").value.trim();
-  const bigCatName = document.getElementById("bigCatName").value;
+  if (!content) {
+    showStatus('submitStatus', '提案内容を入力してください', 'error');
+    return;
+  }
 
-  if (!content ||!bigCatName) {
-    showStatus('submitStatus', '提案内容と大分類は必須です', 'error');
+  if (!currentBigCat ||!currentSmallCat) {
+    showStatus('submitStatus', '先に「AI壁打ち実行」を押して分類してください', 'error');
     return;
   }
 
@@ -173,14 +148,15 @@ async function submitOpinion() {
   try {
     const res = await fetch(GAS_URL, {
       method: "POST",
-      headers: { 'Content-Type': 'application/json' },
+      mode: 'cors',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({
         action: "submit",
         content,
-        bigCatName,
-        imageBase64: uploadedImageBase64,
+        bigCatName: currentBigCat,
+        smallCatName: currentSmallCat,
         userId: currentUserId,
-        aiAnalysisJson: window.tempAiAnalysisJson || ''
+        aiAnalysisJson: tempAiAnalysisJson || ''
       })
     });
 
@@ -190,10 +166,10 @@ async function submitOpinion() {
     if (data.status === "success") {
       showStatus('submitStatus', '提案を登録しました！', 'success');
       document.getElementById("content").value = "";
-      document.getElementById("bigCatName").value = "";
-      clearImage();
-      window.tempAiAnalysisJson = null;
-      document.getElementById("aiResult").innerHTML = '<span style="color: #9ca3af;">「AI壁打ち実行」を押すと、AIが分類提案と改善アドバイスを表示します</span>';
+      tempAiAnalysisJson = null;
+      currentBigCat = null;
+      currentSmallCat = null;
+      document.getElementById("aiResult").innerHTML = '<span style="color: #9ca3af;">「AI壁打ち実行」を押すと、AIが自動分類と改善アドバイスを表示します</span>';
       setTimeout(() => {
         document.getElementById('list-tab-btn').click();
       }, 1500);
@@ -244,7 +220,6 @@ async function fetchOpinions() {
             </div>
             ${op.recommended_title? `<div style="margin-bottom: 8px; font-weight: 600; color: #1e40af;">${escapeHtml(op.recommended_title)}</div>` : ''}
             <div class="opinion-content">${escapeHtml(op.content)}</div>
-            ${op.image_url? `<img src="${op.image_url}" class="opinion-image" alt="投稿画像">` : ''}
             <button class="like-btn ${op.user_liked? 'liked' : ''}" onclick="toggleLike(${op.id}, ${op.user_liked})">
               ${op.user_liked? '❤️ いいね済み' : '🤍 いいね'} (${op.like_count || 0})
             </button>
@@ -266,7 +241,8 @@ async function toggleLike(opinionId, currentlyLiked) {
   try {
     const res = await fetch(GAS_URL, {
       method: "POST",
-      headers: { 'Content-Type': 'application/json' },
+      mode: 'cors',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({
         action: "toggleLike",
         opinionId,
@@ -319,11 +295,14 @@ function renderBaseSummary() {
 
 async function generateFinalProposal() {
   const originalContent = document.getElementById("content").value.trim();
-  const bigCatName = document.getElementById("bigCatName").value;
-
-  if (!originalContent ||!bigCatName) {
+  if (!originalContent) {
     alert("先に「提案作成」タブで提案内容を入力し、AI壁打ちを実行してください");
     document.getElementById('create-tab-btn').click();
+    return;
+  }
+
+  if (!currentBigCat) {
+    alert("先に「AI壁打ち実行」を押して分類してください");
     return;
   }
 
@@ -336,11 +315,12 @@ async function generateFinalProposal() {
   try {
     const res = await fetch(GAS_URL, {
       method: "POST",
-      headers: { 'Content-Type': 'application/json' },
+      mode: 'cors',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({
         action: "generateFinal",
         originalContent,
-        bigCatName,
+        bigCatName: currentBigCat,
         userId: currentUserId
       })
     });
@@ -381,3 +361,9 @@ function showStatus(elementId, message, type) {
   const el = document.getElementById(elementId);
   if (!el) return;
   el.className = `status-message status-${type}`;
+  el.textContent = message;
+  setTimeout(() => {
+    el.textContent = '';
+    el.className = '';
+  }, 4000);
+}
