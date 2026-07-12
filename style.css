@@ -377,3 +377,14 @@ body {
 .my-post-item.status-new.my-post-status { color: #1d4ed8; }
 .my-post-item.status-merged.my-post-status { color: #b45309; }
 .my-post-item.status-original.my-post-status { color: #475569; }
+/* 提案箱タブを強制表示 */
+#list-tab-pane {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+#proposal-container {
+  display: block !important;
+  min-height: 400px !important;
+}
