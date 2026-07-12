@@ -227,21 +227,21 @@ async function fetchOpinions() {
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
 
-        // GASが配列で返してくる場合と、{status, opinions}で返す場合の両対応
-        if (Array.isArray(data)) {
-            allOpinions = data;
-        } else if (data.status === "success") {
-            allOpinions = data.opinions || [];
-        } else {
-            console.error('GASエラー:', data.message || data);
+        if (data.status === "error") {
+            console.error('GASエラー:', data.message);
+            document.getElementById("proposal-container").innerHTML =
+                `<p style="padding:12px; color:#dc2626;">GASエラー: ${escapeHtml(data.message)}</p>`;
             allOpinions = [];
+            return;
         }
 
+        allOpinions = data.opinions || [];
         renderProposalTree(allOpinions);
     } catch (err) {
         console.error('通信エラー:', err);
+        document.getElementById("proposal-container").innerHTML =
+            '<p style="padding:12px; color:#dc2626;">通信エラー。GASのURLとデプロイを確認してください。</p>';
         allOpinions = [];
-        renderProposalTree(allOpinions);
     }
 }
 
