@@ -1,5 +1,5 @@
 // グローバル変数。2重読み込み対策済み
-var GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbyv4Hp_R9RP29hlrDkreNbrxBcFbLtm7ajSjl2QmpJKnm1X2HaiibwkI0ahW4Osf71x6Q/exec";
+var GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbz7_nn1uo5pr58A0uUm1VvxxcC3uiLdiDllXJf72T4Yv8gvdcrtr5KTEVxK8t3I_UJACg/exec";
 var allOpinions = window.allOpinions || [];
 
 const CATEGORY_MASTER = {
@@ -104,12 +104,62 @@ async function aiAnalysis() {
     }
 }
 
-// 1. 最初にこれ
+async function submitOpinion() {
+    const getVal = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : "";
+    };
+
+    const title = getVal("title");
+    const summary = getVal("summary");
+    const content = getVal("content");
+    const bigCatName = getVal("bigCatName");
+    const midCatName = getVal("midCatName");
+    const author = getVal("author");
+
+    if (!title || !summary || !content) {
+        alert("タイトル・要約・内容を入力してください。先にAI壁打ちを実行してください。");
+        return;
+    }
+    if (!bigCatName || !midCatName) {
+        alert("分類が判定できませんでした。AI壁打ちをやり直してください。");
+        return;
+    }
+
+    try {
+        const res = await fetch(GAS_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "submit",
+                title,
+                summary,
+                content,
+                bigCatName,
+                midCatName,
+                author
+            })
+        });
+        const data = await res.json();
+        console.log('GASからの返事:', data);
+
+        if (data.status == "success") {
+            await fetchOpinions();
+            alert("提案を登録しました");
+            clearForm();
+        } else {
+            alert(data.message || "登録に失敗しました");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("通信エラー");
+    }
+}
+
 async function fetchOpinions() {
     try {
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
-        if (data.status!== "success") {
+        if (data.status !== "success") {
             console.error(data.message);
             return;
         }
@@ -120,160 +170,108 @@ async function fetchOpinions() {
     }
 }
 
-// 2. 次にこれ
-async function submitOpinion() {
-  const title = document.getElementById("title").value.trim();
-  const summary = document.getElementById("summary").value.trim();
-  const content = document.getElementById("content").value.trim();
-  const bigCatName = document.getElementById("bigCatName").value.trim();
-  const midCatName = document.getElementById("midCatName").value.trim();
-  const author = document.getElementById("author").value.trim();
-
-  // ★送る前にチェック
-  console.log('=== 登録前の値 ===');
-  console.log('title:', title);
-  console.log('bigCatName:', bigCatName);
-  console.log('midCatName:', midCatName);
-
-  if (!title) return alert("タイトルが空です。AI壁打ちを実行してください");
-  if (!bigCatName) return alert("大分類が空です。AI壁打ちを実行してください");
-
-  try {
-    const payload = { action: "addOpinion", title, summary, content, bigCatName, midCatName, author };
-    console.log('=== GASに送るデータ ===', payload);
-
-    const res = await fetch(GAS_URL, {
-      method: "POST",
-      body: JSON.stringify(payload)
-    });
-    
-    const data = await res.json();
-    console.log('=== GASからの返事 ===', data);
-
-    if (data.status === "success") {
-      await fetchOpinions();
-      alert(`提案を登録しました。\n\nあなたの投稿は「${bigCatName}」→「${midCatName}」に格納されました。`);
-      clearForm();
-      document.getElementById('list-tab-btn')?.click();
-      renderProposalTree(allOpinions);
-    } else {
-      alert("登録失敗\n理由: " + (data.message || JSON.stringify(data)));
-    }
-  } catch (err) {
-    console.error('=== 通信エラー詳細 ===', err);
-    alert("通信エラー\n" + err.toString());
-  }
-}
-// 3. 最後にこれ
 function renderProposalTree(opinions) {
-  const container = document.getElementById("proposal-container");
-  if (!container) return;
-  container.innerHTML = '';
-
-  Object.keys(CATEGORY_MASTER).forEach(bigId => {
-    const big = CATEGORY_MASTER[bigId].name;
-    const mids = CATEGORY_MASTER[bigId].mids;
-    let bigHtml = "";
-    let bigCount = 0;
-
-    Object.keys(mids).forEach(midId => {
-      const mid = mids[midId];
-      const matched = opinions.filter(o => o.bigCatName === big && o.midCatName === mid);
-
-      if (matched.length === 0) return;
-      bigCount += matched.length;
-
-      const newPosts = matched.filter(p => p.status === "新規" || p.status === "新提案" ||!p.status);
-      const mergedPosts = matched.filter(p => p.status === "新統合");
-      const originalPosts = matched.filter(p => p.status === "元記事");
-
-      let postsHtml = '';
-
-      newPosts.forEach(post => {
-        postsHtml += `
-          <div style="margin:6px 0; padding:10px; border-left:3px solid #198754; background:#fff;">
-            <span class="badge bg-success">新提案</span>
-            <div style="font-weight:600; margin-top:4px;">${escapeHtml(post.title)}</div>
-            <div style="font-size:9pt; color:#666;">投稿者: ${escapeHtml(post.author || '匿名')}</div>
-          </div>
-        `;
-      });
-
-      mergedPosts.forEach(post => {
-        postsHtml += `
-          <div style="margin:6px 0; padding:10px; border-left:3px solid #ffc107; background:#fff;">
-            <span class="badge bg-warning text-dark">新統合</span>
-            <div style="font-weight:600; margin-top:4px;">${escapeHtml(post.title)}</div>
-            <div style="font-size:9pt; color:#666;">投稿者: ${escapeHtml(post.author || '匿名')}</div>
-          </div>
-        `;
-      });
-
-      if (originalPosts.length > 0) {
-        postsHtml += `
-          <div style="margin:8px 0; border:1px dashed #6c757d; border-radius:6px;">
-            <div class="original-toggle" style="padding:8px 10px; background:#f8f9fa; cursor:pointer; user-select:none;">
-              ▶ 元記事 (${originalPosts.length}件) を表示
-            </div>
-            <div class="original-content" style="display:none; padding:8px;">
-              ${originalPosts.map(post => `
-                <div style="margin:4px 0; padding:8px; border-left:3px solid #6c757d; background:#fff; font-size:9.5pt;">
-                  <span class="badge bg-secondary">元記事</span>
-                  <div style="margin-top:2px;">${escapeHtml(post.title)}</div>
-                  <div style="font-size:8pt; color:#666;">${escapeHtml(post.author || '匿名')}</div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        `;
-      }
-
-      bigHtml += `
-        <div style="margin:8px 0; border:1px solid #dee2e6; border-radius:8px;">
-          <div class="mid-toggle" style="padding:10px; background:#f8f9fa; font-weight:600; cursor:pointer;">
-            ▶ ${mid} (${matched.length}件)
-          </div>
-          <div class="mid-content" style="display:none; padding:8px;">
-            ${postsHtml}
-          </div>
-        </div>
-      `;
-    });
-
-    if (bigCount > 0) {
-      container.innerHTML += `
-        <div style="margin-bottom:16px; border:2px solid #0d6efd; border-radius:10px;">
-          <div class="big-toggle" style="padding:14px; background:#0d6efd; color:#fff; font-weight:700; cursor:pointer;">
-            ▶ ${big} (${bigCount}件)
-          </div>
-          <div class="big-content" style="display:none; padding:12px;">
-            ${bigHtml}
-          </div>
-        </div>
-      `;
+    const container = document.getElementById("proposal-container");
+    if (!container) {
+        console.error('proposal-container not found');
+        return;
     }
-  });
 
-  if (container.innerHTML === '') {
-    container.innerHTML = '<div class="alert alert-secondary">まだ提案がありません</div>';
-  }
+    // 一旦全部消す
+    container.innerHTML = '';
+    container.style.cssText = 'font-size:10.5pt; width:100%; padding:20px 0;';
 
-  container.querySelectorAll('.big-toggle,.mid-toggle,.original-toggle').forEach(el => {
-    el.addEventListener('click', function(e) {
-      e.stopPropagation();
-      const content = this.nextElementSibling;
-      if (!content) return;
-      const isOpen = content.style.display === 'block';
-      content.style.display = isOpen? 'none' : 'block';
-      this.innerHTML = this.innerHTML.replace(isOpen? '▼' : '▶', isOpen? '▶' : '▼');
+    let totalCount = 0;
+
+    Object.keys(CATEGORY_MASTER).forEach((bigId) => {
+        const big = CATEGORY_MASTER[bigId].name;
+        const mids = CATEGORY_MASTER[bigId].mids;
+        let bigHtml = "";
+        let bigCount = 0;
+
+        Object.keys(mids).forEach((midId) => {
+            const mid = mids[midId];
+            const matched = opinions.filter(o => {
+                const oBig = (o.bigCatName || "").trim();
+                const oMid = (o.midCatName || "").trim();
+                const bigMatch = oBig.includes(big.split('（')[0]) || big.includes(oBig.split('（')[0]);
+                const midMatch = oMid === mid || oMid.includes(mid) || mid.includes(oMid);
+                return bigMatch && midMatch;
+            });
+
+            if (matched.length === 0) return;
+            bigCount += matched.length;
+
+            let postsHtml = '';
+            matched.forEach((post) => {
+                let icon = "📝";
+                let borderColor = '#94a3b8';
+                if (post.status == "新統合") { icon = "⭐"; borderColor = '#f59e0b'; }
+                if (post.status == "元記事") { icon = "📄"; borderColor = '#64748b'; }
+
+                postsHtml += `
+                    <div style="margin:6px 0; padding:10px 12px; border-left:3px solid ${borderColor}; background:#fff; border-radius:4px;">
+                        <div class="post-toggle" style="cursor:pointer; font-weight:600; color:#1e293b;">
+                            ${icon} ${escapeHtml(post.title)}
+                        </div>
+                        <div class="post-content" style="display:none; padding:10px; margin-top:8px; background:#f8fafc; border-radius:6px; font-size:10pt; line-height:1.7;">
+                            <div style="color:#475569; white-space:pre-wrap;">${escapeHtml(post.summary)}</div>
+                            ${post.status == "元記事"? `<div style="margin-top:6px; font-size:9pt; color:#64748b; font-style:italic;">統合先：${escapeHtml(post.mergeTitle)}</div>` : ""}
+                        </div>
+                    </div>
+                `;
+            });
+
+            bigHtml += `
+                <div style="margin-bottom:8px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;">
+                    <div class="mid-toggle" style="padding:10px 14px; background:#f1f5f9; color:#334155; font-weight:600; cursor:pointer; user-select:none;">
+                        ▶ ${escapeHtml(mid)} (${matched.length})
+                    </div>
+                    <div class="mid-content" style="display:none; padding:8px 12px;">
+                        ${postsHtml}
+                    </div>
+                </div>
+            `;
+        });
+
+        if (bigCount > 0) {
+            totalCount += bigCount;
+            const bigEl = document.createElement('div');
+            bigEl.style.cssText = 'margin-bottom:12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05);';
+            bigEl.innerHTML = `
+                <div class="big-toggle" style="padding:14px 18px; background:linear-gradient(90deg, #e0f2fe, #f0f9ff); color:#0c4a6e; font-weight:700; cursor:pointer; user-select:none;">
+                    ▶ ${escapeHtml(big)} (${bigCount})
+                </div>
+                <div class="big-content" style="display:none; padding:12px 16px; background:#f8fafc; border-top:1px solid #e2e8f0;">
+                    ${bigHtml}
+                </div>
+            `;
+            container.appendChild(bigEl);
+        }
     });
-  });
+
+    if (totalCount === 0) {
+        container.innerHTML = '<p style="padding:12px; color:#64748b;">表示できる提案がありません</p>';
+        return;
+    }
+
+    // イベント付与：これで確実に動く
+    container.querySelectorAll('.big-toggle,.mid-toggle,.post-toggle').forEach(el => {
+        el.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const content = this.nextElementSibling;
+            if (!content) return;
+            const isOpen = content.style.display === 'block';
+            content.style.display = isOpen? 'none' : 'block';
+            this.innerHTML = this.innerHTML.replace(isOpen? '▼' : '▶', isOpen? '▶' : '▼');
+        });
+    });
+
+    console.log('描画完了:', totalCount, '件');
 }
 
-function escapeHtml(text) {
-  if (!text) return "";
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-}
+// toggleTree関数はもう使わないので削除でOK
+
 function toggleTree(element) {
     const body = element.nextElementSibling;
     if (!body) return;
