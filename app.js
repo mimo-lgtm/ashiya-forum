@@ -308,6 +308,7 @@ function renderProposalTree(opinions) {
 
     Object.keys(CATEGORY_MASTER).forEach((bigId) => {
         const big = CATEGORY_MASTER[bigId].name;
+        const bigShort = big.split('（')[0]; // ★「まちづくり・都市計画」だけ抽出
         const mids = CATEGORY_MASTER[bigId].mids;
         let bigHtml = "";
         let bigCount = 0;
@@ -317,8 +318,9 @@ function renderProposalTree(opinions) {
             const matched = opinions.filter(o => {
                 const oBig = (o.bigCatName || "").trim();
                 const oMid = (o.midCatName || "").trim();
-                const bigMatch = oBig.includes(big.split('（')[0]) || big.includes(oBig.split('（')[0]);
-                const midMatch = oMid === mid || oMid.includes(mid) || mid.includes(oMid);
+                // ★部分一致で判定
+                const bigMatch = oBig.includes(bigShort);
+                const midMatch = oMid === mid;
                 return bigMatch && midMatch;
             });
 
@@ -342,10 +344,14 @@ function renderProposalTree(opinions) {
                     statusCls = 'status-original';
                 }
 
+                // ★自分の投稿なら強調
+                const isMyPost = post.authorId === CURRENT_USER_ID;
+                const myStyle = isMyPost? 'background:#fffbeb; border:2px solid #f59e0b;' : 'background:#fff;';
+
                 postsHtml += `
-                    <div class="tree-post ${statusCls}" style="margin:6px 0; padding:10px 12px; border-left:3px solid ${borderColor}; background:#fff; border-radius:4px;">
+                    <div class="tree-post ${statusCls}" style="margin:6px 0; padding:10px 12px; border-left:3px solid ${borderColor}; ${myStyle} border-radius:4px;">
                         <div class="post-toggle" style="cursor:pointer; font-weight:600; color:#1e293b;">
-                            ${escapeHtml(post.title)}
+                            ${icon} ${escapeHtml(post.title)} ${isMyPost? '<span class="badge bg-warning text-dark">あなたの投稿</span>' : ''}
                         </div>
                         <div class="post-content" style="display:none; padding:10px; margin-top:8px; background:#f8fafc; border-radius:6px; font-size:10pt; line-height:1.7;">
                             <div style="color:#475569; white-space:pre-wrap;">${escapeHtml(post.summary)}</div>
@@ -402,7 +408,6 @@ function renderProposalTree(opinions) {
     renderMyPostsPanel();
     console.log('描画完了:', totalCount, '件');
 }
-
 function clearForm() {
     ["title","summary","content","bigCatName","midCatName","author"].forEach(id => {
         const el = document.getElementById(id);
