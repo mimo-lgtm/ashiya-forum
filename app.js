@@ -366,8 +366,8 @@ function renderProposalTree(opinions) {
 
                 opinions
                 .filter(p =>
-                    p.bigCatName === big &&
-                    p.midCatName === mid &&
+                    p.big_category === big &&
+                    p.small_category === mid &&
                     p.status === status
                 )
                 .forEach(post=>{
