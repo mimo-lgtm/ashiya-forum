@@ -24,7 +24,35 @@ const CATEGORY_MASTER = {
     mids: { "MID-1": "行政の透明性・効率化", "MID-2": "市民参加・協働", "MID-3": "文化・芸術・スポーツ", "MID-4": "産業・雇用・にぎわい", "MID-5": "その他" } 
   }
 };
+// 大分類ごとのAI固定要約。GASか定数で持つ。ここは仮データ
+const AI_BASE_SUMMARY = {
+    "まちづくり・都市計画": "芦屋市の公園緑地は市民の憩いの場として重要です。老朽化した遊具の更新、バリアフリー化、防災機能の付加が急務です。六甲山の自然を活かした散策路整備と、駅前空間の再開発による回遊性向上を両立させます。子育て世代と高齢者が共に使える多世代交流拠点の創出を目指し、民間活力の導入も検討します。",
+    // 他の大分類も同様に300字で定義
+};
 
+function generateFinalProposal(bigCatName) {
+    const baseText = AI_BASE_SUMMARY[bigCatName] || '';
+    const newMerged = opinions.filter(o => 
+        o.bigCatName.includes(bigCatName.split('（')[0]) && 
+        o.status === '新統合'
+    );
+    
+    // 新統合記事を150字に要約。複数あれば結合
+    let citizenText = '';
+    if (newMerged.length > 0) {
+        citizenText = newMerged.map(p => p.summary).join('').slice(0, 150);
+    } else {
+        citizenText = '市民からの新提案をお待ちしています。';
+    }
+    
+    return baseText.slice(0, 150) + '\n\n【市民の声を反映】\n' + citizenText;
+}
+
+// 地図のノードクリックで呼ぶ関数
+function showFinalProposal(bigCatName) {
+    const text = generateFinalProposal(bigCatName);
+    document.getElementById('final-proposal-text').innerText = text;
+}
 document.addEventListener("DOMContentLoaded", () => {
     // 初回読み込み
     fetchOpinions();
