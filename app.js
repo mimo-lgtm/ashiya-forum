@@ -296,10 +296,7 @@ function renderMyPostsPanel() {
 
 function renderProposalTree(opinions) {
     const container = document.getElementById("proposal-container");
-    if (!container) {
-        console.error('proposal-container not found');
-        return;
-    }
+    if (!container) return;
 
     container.innerHTML = '';
     container.style.cssText = 'font-size:10.5pt; width:100%; padding:20px 0;';
@@ -308,21 +305,16 @@ function renderProposalTree(opinions) {
 
     Object.keys(CATEGORY_MASTER).forEach((bigId) => {
         const big = CATEGORY_MASTER[bigId].name;
-        const bigShort = big.split('（')[0].trim(); // 「まちづくり・都市計画」だけ抽出
         const mids = CATEGORY_MASTER[bigId].mids;
         let bigHtml = "";
         let bigCount = 0;
 
         Object.keys(mids).forEach((midId) => {
             const mid = mids[midId];
-            const matched = opinions.filter(o => {
-                const oBig = (o.bigCatName || "").trim();
-                const oMid = (o.midCatName || "").trim();
-                // ★修正：両方とも部分一致で判定
-                const bigMatch = oBig.includes(bigShort) || bigShort.includes(oBig);
-                const midMatch = oMid === mid;
-                return bigMatch && midMatch;
-            });
+            // ★元に戻す：完全一致
+            const matched = opinions.filter(o =>
+                o.bigCatName === big && o.midCatName === mid
+            );
 
             if (matched.length === 0) return;
             bigCount += matched.length;
@@ -330,31 +322,18 @@ function renderProposalTree(opinions) {
             let postsHtml = '';
             matched.forEach((post) => {
                 let icon = "📝";
-                let statusCls = 'status-new';
-                let borderColor = '#3b82f6';
-
-                if (post.status == "新統合") {
-                    icon = "⭐";
-                    borderColor = '#f59e0b';
-                    statusCls = 'status-merged';
-                }
-                if (post.status == "元記事") {
-                    icon = "📄";
-                    borderColor = '#64748b';
-                    statusCls = 'status-original';
-                }
-
-                const isMyPost = post.authorId === CURRENT_USER_ID;
-                const myStyle = isMyPost? 'background:#fffbeb; border:2px solid #f59e0b;' : 'background:#fff;';
+                let borderColor = '#94a3b8';
+                if (post.status == "新統合") { icon = "⭐"; borderColor = '#f59e0b'; }
+                if (post.status == "元記事") { icon = "📄"; borderColor = '#64748b'; }
 
                 postsHtml += `
-                    <div class="tree-post ${statusCls}" style="margin:6px 0; padding:10px 12px; border-left:3px solid ${borderColor}; ${myStyle} border-radius:4px;">
+                    <div style="margin:6px 0; padding:10px 12px; border-left:3px solid ${borderColor}; background:#fff; border-radius:4px;">
                         <div class="post-toggle" style="cursor:pointer; font-weight:600; color:#1e293b;">
-                            ${icon} ${escapeHtml(post.title || '無題')} ${isMyPost? '<span class="badge bg-warning text-dark">あなたの投稿</span>' : ''}
+                            ${icon} ${escapeHtml(post.title)}
                         </div>
                         <div class="post-content" style="display:none; padding:10px; margin-top:8px; background:#f8fafc; border-radius:6px; font-size:10pt; line-height:1.7;">
-                            <div style="color:#475569; white-space:pre-wrap;">${escapeHtml(post.summary || '')}</div>
-                            ${post.status == "元記事"? `<div style="margin-top:6px; font-size:9pt; color:#64748b; font-style:italic;">統合先：${escapeHtml(post.mergeTitle || '')}</div>` : ""}
+                            <div style="color:#475569; white-space:pre-wrap;">${escapeHtml(post.summary)}</div>
+                            ${post.status == "元記事"? `<div style="margin-top:6px; font-size:9pt; color:#64748b; font-style:italic;">統合先：${escapeHtml(post.mergeTitle)}</div>` : ""}
                         </div>
                     </div>
                 `;
@@ -389,8 +368,7 @@ function renderProposalTree(opinions) {
     });
 
     if (totalCount === 0) {
-        container.innerHTML = '<p style="padding:12px; color:#64748b;">表示できる提案がありません。<br>大分類名が一致していない可能性があります。</p>';
-        console.warn('マッチ0件。allOpinionsの中身:', opinions);
+        container.innerHTML = '<p style="padding:12px; color:#64748b;">表示できる提案がありません</p>';
         return;
     }
 
@@ -405,7 +383,6 @@ function renderProposalTree(opinions) {
         });
     });
 
-    renderMyPostsPanel();
     console.log('描画完了:', totalCount, '件');
 }
 function clearForm() {
