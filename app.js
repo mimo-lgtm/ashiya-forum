@@ -296,11 +296,14 @@ function renderMyPostsPanel() {
 
 function renderProposalTree(opinions) {
     const container = document.getElementById("proposal-container");
-    if (!container) return;
+    if (!container) {
+        console.error('proposal-container not found');
+        return;
+    }
+
+    console.log('render開始', opinions.length);
 
     container.innerHTML = '';
-    container.style.cssText = 'font-size:10.5pt; width:100%; padding:20px 0;';
-
     let totalCount = 0;
 
     Object.keys(CATEGORY_MASTER).forEach((bigId) => {
@@ -311,79 +314,44 @@ function renderProposalTree(opinions) {
 
         Object.keys(mids).forEach((midId) => {
             const mid = mids[midId];
-            // ★元に戻す：完全一致
             const matched = opinions.filter(o =>
                 o.bigCatName === big && o.midCatName === mid
             );
+
+            console.log(`${big}/${mid}`, matched.length); // ★ここまで出るか確認
 
             if (matched.length === 0) return;
             bigCount += matched.length;
 
             let postsHtml = '';
             matched.forEach((post) => {
-                let icon = "📝";
-                let borderColor = '#94a3b8';
-                if (post.status == "新統合") { icon = "⭐"; borderColor = '#f59e0b'; }
-                if (post.status == "元記事") { icon = "📄"; borderColor = '#64748b'; }
-
-                postsHtml += `
-                    <div style="margin:6px 0; padding:10px 12px; border-left:3px solid ${borderColor}; background:#fff; border-radius:4px;">
-                        <div class="post-toggle" style="cursor:pointer; font-weight:600; color:#1e293b;">
-                            ${icon} ${escapeHtml(post.title)}
+                console.log('post:', post); // ★postの中身確認
+                try {
+                    postsHtml += `
+                        <div style="margin:6px 0; padding:10px; border:1px solid #ccc;">
+                            ${post.title || '無題'}
                         </div>
-                        <div class="post-content" style="display:none; padding:10px; margin-top:8px; background:#f8fafc; border-radius:6px; font-size:10pt; line-height:1.7;">
-                            <div style="color:#475569; white-space:pre-wrap;">${escapeHtml(post.summary)}</div>
-                            ${post.status == "元記事"? `<div style="margin-top:6px; font-size:9pt; color:#64748b; font-style:italic;">統合先：${escapeHtml(post.mergeTitle)}</div>` : ""}
-                        </div>
-                    </div>
-                `;
+                    `;
+                } catch(e) {
+                    console.error('描画エラー:', e, post);
+                }
             });
 
             bigHtml += `
-                <div style="margin-bottom:8px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;">
-                    <div class="mid-toggle" style="padding:10px 14px; background:#f1f5f9; color:#334155; font-weight:600; cursor:pointer; user-select:none;">
-                        ▶ ${escapeHtml(mid)} (${matched.length})
-                    </div>
-                    <div class="mid-content" style="display:none; padding:8px 12px;">
-                        ${postsHtml}
-                    </div>
+                <div style="margin:8px 0; border:1px solid #e2e8f0;">
+                    <div>${mid} (${matched.length})</div>
+                    <div>${postsHtml}</div>
                 </div>
             `;
         });
 
         if (bigCount > 0) {
             totalCount += bigCount;
-            const bigEl = document.createElement('div');
-            bigEl.style.cssText = 'margin-bottom:12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05);';
-            bigEl.innerHTML = `
-                <div class="big-toggle" style="padding:14px 18px; background:linear-gradient(90deg, #e0f2fe, #f0f9ff); color:#0c4a6e; font-weight:700; cursor:pointer; user-select:none;">
-                    ▶ ${escapeHtml(big)} (${bigCount})
-                </div>
-                <div class="big-content" style="display:none; padding:12px 16px; background:#f8fafc; border-top:1px solid #e2e8f0;">
-                    ${bigHtml}
-                </div>
-            `;
-            container.appendChild(bigEl);
+            container.innerHTML += `<div><h3>${big} (${bigCount})</h3>${bigHtml}</div>`;
         }
     });
 
-    if (totalCount === 0) {
-        container.innerHTML = '<p style="padding:12px; color:#64748b;">表示できる提案がありません</p>';
-        return;
-    }
-
-    container.querySelectorAll('.big-toggle,.mid-toggle,.post-toggle').forEach(el => {
-        el.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const content = this.nextElementSibling;
-            if (!content) return;
-            const isOpen = content.style.display === 'block';
-            content.style.display = isOpen? 'none' : 'block';
-            this.innerHTML = this.innerHTML.replace(isOpen? '▼' : '▶', isOpen? '▶' : '▼');
-        });
-    });
-
-    console.log('描画完了:', totalCount, '件');
+    console.log('render完了', totalCount);
 }
 function clearForm() {
     ["title","summary","content","bigCatName","midCatName","author"].forEach(id => {
