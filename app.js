@@ -211,8 +211,15 @@ async function submitOpinion() {
 
         if (data.status == "success") {
             await fetchOpinions();
-            alert("提案を登録しました");
             clearForm();
+            alert("提案を登録しました");
+
+            // ★提案箱タブに自動移動
+            const listTabBtn = document.getElementById('list-tab-btn');
+            if (listTabBtn) {
+                const tab = new bootstrap.Tab(listTabBtn);
+                tab.show();
+            }
         } else {
             alert(data.message || "登録に失敗しました");
         }
