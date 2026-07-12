@@ -131,20 +131,29 @@ async function submitOpinion() {
 
   if (!title ||!bigCatName) return alert("先にAI壁打ちを実行してください");
 
-  const res = await fetch(GAS_URL, {
-    method: "POST",
-    body: JSON.stringify({ action: "addOpinion", title, summary, content, bigCatName, midCatName, author })
-  });
-  const data = await res.json();
+  console.log('送信データ:', { title, summary, content, bigCatName, midCatName, author });
 
-  if (data.status === "success") {
-    await fetchOpinions(); // ← これで最新データ取得
-    alert(`提案を登録しました。\n\nあなたの投稿は「${bigCatName}」→「${midCatName}」に格納されました。`);
-    clearForm();
-    document.getElementById('list-tab-btn')?.click();
-    renderProposalTree(allOpinions);
-  } else {
-    alert("登録失敗");
+  try {
+    const res = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "addOpinion", title, summary, content, bigCatName, midCatName, author })
+    });
+    const data = await res.json();
+    console.log('GASからの返事:', data);
+
+    if (data.status === "success") {
+      await fetchOpinions();
+      alert(`提案を登録しました。\n\nあなたの投稿は「${bigCatName}」→「${midCatName}」に格納されました。`);
+      clearForm();
+      document.getElementById('list-tab-btn')?.click();
+      renderProposalTree(allOpinions);
+    } else {
+      // ★ここでエラーメッセージを表示
+      alert("登録失敗: " + (data.message || "不明なエラー"));
+    }
+  } catch (err) {
+    console.error('通信エラー:', err);
+    alert("通信エラー: " + err);
   }
 }
 
