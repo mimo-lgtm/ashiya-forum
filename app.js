@@ -171,6 +171,54 @@ async function fetchOpinions() {
 }
 
 function renderProposalTree(opinions) {
+  // 現在のユーザーID。Googleログインから取る想定。なければ仮で固定
+const CURRENT_USER_ID = localStorage.getItem('userEmail') || 'guest@example.com';
+
+function findMyPosts(opinions) {
+    return opinions.filter(o => o.authorEmail === CURRENT_USER_ID || o.authorId === CURRENT_USER_ID);
+}
+
+function renderMyPostsPanel() {
+    const myPosts = findMyPosts(opinions);
+    const panel = document.getElementById('my-posts-panel');
+    if (!panel) return;
+    
+    if (myPosts.length === 0) {
+        panel.innerHTML = '<div class="p-3 text-muted">あなたの投稿はまだありません</div>';
+        return;
+    }
+
+    let html = '<div class="p-3"><h6 class="mb-3">あなたの投稿一覧</h6>';
+    myPosts.forEach(post => {
+        let statusText = '';
+        let statusClass = '';
+        let locationText = `${post.bigCatName} > ${post.midCatName}`;
+        
+        if (post.status === '新提案' || post.status === '単独') {
+            statusText = '新提案：まだ統合されていません';
+            statusClass = 'status-new';
+        } else if (post.status === '新統合') {
+            statusText = '新統合：あなたの提案が元になって統合されました';
+            statusClass = 'status-merged';
+        } else if (post.status === '元記事') {
+            statusText = `統合済み：統合先「${post.mergeTitle || '不明'}」に含まれています`;
+            statusClass = 'status-original';
+        }
+
+        html += `
+        <div class="my-post-item ${statusClass}">
+            <div class="my-post-title">${escapeHtml(post.title)}</div>
+            <div class="my-post-location">場所：${escapeHtml(locationText)}</div>
+            <div class="my-post-status">${statusText}</div>
+        </div>`;
+    });
+    html += '</div>';
+    panel.innerHTML = html;
+}
+
+// loadOpinionsFromGASの最後で呼ぶ
+// renderProposalTree(opinions); の次に
+renderMyPostsPanel();
     const container = document.getElementById("proposal-container");
     if (!container) {
         console.error('proposal-container not found');
