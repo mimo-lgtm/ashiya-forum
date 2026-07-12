@@ -65,18 +65,25 @@ async function aiAnalysis() {
         }
 
         const r = data.result;
-        const big = CATEGORY_MASTER[r.bigCatId];
-        const bigCatName = big ? big.name : "その他";
-        const midCatName = big && big.mids[r.midCatId] ? big.mids[r.midCatId] : "その他";
 
-        const setVal = (id, val) => {
-            const el = document.getElementById(id);
-            if (el) el.value = val || "";
-        };
-        setVal("title", r["推奨タイトル"]);
-        setVal("summary", r["要約200"]);
-        setVal("bigCatName", bigCatName);
-        setVal("midCatName", midCatName);
+// ★デバッグ：AIが生で何返してるか確認
+console.log("AI生データ:", r.bigCatId, r.midCatId);
+
+const big = CATEGORY_MASTER[r.bigCatId];
+const bigCatName = big ? big.name : "不明な大分類";
+
+// ★ここ重要：midCatIdが無効ならbigCatIdのMID-1にフォールバック
+let midCatName = "その他";
+if (big && big.mids) {
+  midCatName = big.mids[r.midCatId] || big.mids["MID-1"] || "その他";
+}
+
+console.log("分類変換結果:", bigCatName, midCatName); // ★これで確認
+
+document.getElementById("title").value = r["推奨タイトル"];
+document.getElementById("summary").value = r["要約200"];
+document.getElementById("bigCatName").value = bigCatName;
+document.getElementById("midCatName").value = midCatName; // ★ここ
 
         const titleEl = document.getElementById("aiTitleText");
         if (titleEl) titleEl.textContent = r["推奨タイトル"] || "";
