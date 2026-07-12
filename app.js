@@ -296,62 +296,24 @@ function renderMyPostsPanel() {
 
 function renderProposalTree(opinions) {
     const container = document.getElementById("proposal-container");
+    console.log('container:', container); // ★nullならHTML側の問題
+    
     if (!container) {
-        console.error('proposal-container not found');
+        alert('proposal-containerがHTMLにありません');
         return;
     }
 
-    console.log('render開始', opinions.length);
-
-    container.innerHTML = '';
-    let totalCount = 0;
-
-    Object.keys(CATEGORY_MASTER).forEach((bigId) => {
-        const big = CATEGORY_MASTER[bigId].name;
-        const mids = CATEGORY_MASTER[bigId].mids;
-        let bigHtml = "";
-        let bigCount = 0;
-
-        Object.keys(mids).forEach((midId) => {
-            const mid = mids[midId];
-            const matched = opinions.filter(o =>
-                o.bigCatName === big && o.midCatName === mid
-            );
-
-            console.log(`${big}/${mid}`, matched.length); // ★ここまで出るか確認
-
-            if (matched.length === 0) return;
-            bigCount += matched.length;
-
-            let postsHtml = '';
-            matched.forEach((post) => {
-                console.log('post:', post); // ★postの中身確認
-                try {
-                    postsHtml += `
-                        <div style="margin:6px 0; padding:10px; border:1px solid #ccc;">
-                            ${post.title || '無題'}
-                        </div>
-                    `;
-                } catch(e) {
-                    console.error('描画エラー:', e, post);
-                }
-            });
-
-            bigHtml += `
-                <div style="margin:8px 0; border:1px solid #e2e8f0;">
-                    <div>${mid} (${matched.length})</div>
-                    <div>${postsHtml}</div>
-                </div>
-            `;
-        });
-
-        if (bigCount > 0) {
-            totalCount += bigCount;
-            container.innerHTML += `<div><h3>${big} (${bigCount})</h3>${bigHtml}</div>`;
-        }
+    container.innerHTML = '<h2 style="color:red;">テスト：' + opinions.length + '件受信</h2>';
+    
+    opinions.forEach((post, i) => {
+        container.innerHTML += `
+            <div style="border:1px solid #ccc; margin:4px; padding:8px;">
+                ${i+1}. ${post.title || 'タイトル空'} / ${post.bigCatName || '大分類空'}
+            </div>
+        `;
     });
-
-    console.log('render完了', totalCount);
+    
+    console.log('描画完了');
 }
 function clearForm() {
     ["title","summary","content","bigCatName","midCatName","author"].forEach(id => {
