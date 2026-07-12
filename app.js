@@ -35,13 +35,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnSubmitToBox) btnSubmitToBox.addEventListener("click", submitOpinion);
     
     // ★修正: タブ3「届いた提案箱」をクリックしたら再描画
-    const listTabBtn = document.getElementById('list-tab-btn');
-    if (listTabBtn) {
-        listTabBtn.addEventListener('shown.bs.tab', () => {
-            console.log('提案箱タブが表示された');
-            renderProposalTree(allOpinions);
-        });
-    }
+    const tabBtn = document.getElementById('list-tab-btn');
+if (tabBtn) {
+    tabBtn.addEventListener('shown.bs.tab', function() {
+        console.log('提案箱タブが表示された'); // ★追加3
+        renderProposalTree(allOpinions);
+    });
+}
 });
 
 async function aiAnalysis() {
@@ -156,6 +156,7 @@ async function submitOpinion() {
 }
 
 async function fetchOpinions() {
+    console.log('fetchOpinions開始'); // ★追加2
     try {
         const res = await fetch(GAS_URL + "?action=get");
         const data = await res.json();
