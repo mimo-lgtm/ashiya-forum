@@ -1,7 +1,7 @@
 // ========================================
 // 設定
 // ========================================
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzYOUR_GAS_ID/exec"; // ★必ず変更
+const GAS_URL = "https://script.google.com/macros/s/AKfycby_OQ5DcuYRTVJ2xgHGB88oQJHA0lzrjpG1eFD5Q6Aa0A_vf5h5cZjEUbn6k623ojibvg/exec"; // ★必ず変更
 
 // 大分類マスター
 const CATEGORY_MASTER = {
