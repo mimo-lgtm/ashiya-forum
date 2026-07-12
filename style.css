@@ -1,364 +1,83 @@
-2.style.css
+/* proposal-tree.css */
 
-body {
-    font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-    background-color: #f1f5f9 !important;
-    color: #334155;
-    -webkit-font-smoothing: antialiased;
+.tree-big{
+    margin-bottom:20px;
+    border:1px solid #d9d9d9;
+    border-radius:10px;
+    overflow:hidden;
 }
 
-/* 案内バー */
-.navbar-dark.bg-dark {
-    background-color: #0f172a !important;
+.tree-big-title{
+    background:#1e40af;
+    color:#fff;
+    padding:15px;
+    font-size:20px;
+    font-weight:bold;
+    cursor:pointer;
 }
 
-/* 切り替えボタン */
-.max-width-tabs {
-    max-width: 600px;
-    margin: 0 auto;
-    border: 1px solid #e2e8f0;
+.tree-big-body{
+    display:none;
+    background:#f8fafc;
+    padding:15px;
 }
 
-.nav-pills .nav-link {
-    color: #64748b;
-    background: transparent;
-    transition: all 0.25s ease;
-    font-size: 10pt;
-    padding: 10px 15px;
+.tree-mid{
+    margin:12px 0;
+    border:1px solid #ddd;
+    border-radius:8px;
+    overflow:hidden;
 }
 
-.nav-pills .nav-link.active {
-    color: #ffffff !important;
-    background-color: #3b82f6 !important;
-    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
+.tree-mid-title{
+    background:#eef4ff;
+    padding:12px;
+    font-weight:bold;
+    cursor:pointer;
 }
 
-.py-25 {
-    padding-top: 0.65rem !important;
-    padding-bottom: 0.65rem !important;
+.tree-mid-body{
+    display:none;
+    padding:10px;
 }
 
-/* ── 🌳 木の画像の上に文字を重ねるエリアの調整 ── */
-.tree-container {
-    position: relative;
-    width: 100%;
-    height: 480px;
-    /* ユーザー様の用意したロジックツリー背景画像（logic.jpg）を読み込みます */
-    background-image: url('image/logic.jpg');
-    background-size: cover;
-    background-position: center;
-    border: 1px solid #cbd5e1;
+.tree-post{
+    margin:10px 0;
+    border-left:6px solid #2563eb;
+    border-radius:6px;
+    background:#fff;
+    overflow:hidden;
 }
 
-/* 画像の上の透明な空間 */
-.tree-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(15, 23, 42, 0.12); /* 画像の文字を邪魔しない程度の薄い影 */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    padding: 40px 20px;
+.tree-post-title{
+    padding:10px 14px;
+    cursor:pointer;
+    font-weight:bold;
+    background:#fafafa;
 }
 
-/* プレートの見た目 */
-.tree-plate {
-    background: #7c2d12; /* 木の看板風の茶色 */
-    color: #ffffff;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: 700;
-    text-align: center;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25), inset 0 0 0 2px #9a3412;
-    border: 2px solid #ffedd5;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: transform 0.2s;
+.tree-post-body{
+    display:none;
+    padding:15px;
+    line-height:1.9;
+    white-space:pre-wrap;
 }
 
-.tree-plate:hover {
-    transform: translateY(-4px);
-    background: #9a3412;
+.tree-post:nth-child(1){
+    border-left-color:#f59e0b;
 }
 
-/* 各プレートの位置調整 */
-.plate-top {
-    font-size: 13pt;
-    width: 280px;
+.tree-post:hover{
+
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+
 }
 
-.plate-row-container {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 1000px;
-    gap: 15px;
+.tree-big-title:hover,
+.tree-mid-title:hover,
+.tree-post-title:hover{
+
+    opacity:.92;
+
 }
 
-.plate-child {
-    flex: 1;
-    font-size: 10pt;
-    min-width: 180px;
-}
-
-.plate-title {
-    display: block;
-    letter-spacing: 0.5px;
-}
-
-.plate-sub {
-    display: block;
-    font-size: 8.5pt;
-    color: #ffedd5;
-    margin-top: 2px;
-    font-weight: 500;
-}
-
-/* 各枠内の挿絵画像の調整 */
-.section-thumb {
-    max-height: 80px;
-    object-fit: cover;
-    width: 140px;
-}
-
-/* ── 折りたたみ（クリックして開く部分） ── */
-.category-accordion-item {
-    background: #ffffff;
-    border-radius: 12px;
-    margin-bottom: 16px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    border: 1px solid #e2e8f0;
-    overflow: hidden;
-}
-
-.category-accordion-header {
-    width: 100%;
-    text-align: left;
-    background: #ffffff;
-    padding: 20px;
-    font-size: 11.5pt;
-    font-weight: 700;
-    color: #0f172a;
-    border: none;
-    border-left: 6px solid #3b82f6;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-}
-
-.category-accordion-header:hover {
-    background-color: #f8fafc;
-}
-
-.category-accordion-body {
-    padding: 24px;
-    background: #f8fafc;
-    border-top: 1px solid #e2e8f0;
-}
-
-.lane-row {
-    display: flex;
-    gap: 20px;
-    width: 100%;
-}
-
-.lane-col {
-    flex: 1;
-    min-width: 0;
-    background: #ffffff;
-    border-radius: 10px;
-    padding: 16px;
-    border: 1px solid #e2e8f0;
-}
-
-.col-header {
-    font-size: 9.5pt;
-    font-weight: 700;
-    padding: 8px;
-    border-radius: 6px;
-    text-align: center;
-    margin-bottom: 16px;
-    background-color: #f1f5f9;
-    color: #475569;
-}
-
-/* 意見カード */
-.opinion-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 14px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.opinion-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.08);
-}
-
-.border-danger-custom { border-top: 4px solid #ef4444; }
-.border-primary-custom { border-top: 4px solid #3b82f6; }
-.border-success-custom { border-top: 4px solid #10b981; }
-
-.card-title-text {
-    font-size: 10pt;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 8px;
-    line-height: 1.4;
-}
-
-.badge-keyword {
-    font-size: 7.5pt;
-    background: #f1f5f9;
-    color: #475569;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-weight: 500;
-    display: inline-block;
-    margin-bottom: 10px;
-}
-
-.mb-35 { margin-bottom: 1.25rem !important; }
-.form-select-custom, .form-control-custom { border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 14px; font-size: 9.5pt; }
-.form-select-custom:focus, .form-control-custom:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
-.transition-btn { transition: all 0.2s ease; }
-.transition-btn:hover { transform: translateY(-1px); }
-.border-dashed { border: 2px dashed #cbd5e1 !important; }
-.shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02); }
-
-@media (max-width: 991.98px) {
-    .lane-row { flex-direction: column; gap: 24px; }
-    .plate-row-container { flex-direction: column; align-items: center; gap: 10px; }
-    .tree-container { height: auto; }
-    .tree-overlay { position: relative; background: #334155; padding: 20px 10px; gap: 20px; }
-}
-
-/* ===== 提案箱ツリー 最終版 ===== */
-/* 既存の .tree-big, .tree-mid, .tree-post 関連は全削除してこれだけにする */
-
-#proposal-container {
-  font-size: 10.5pt;
-  width: 100%;
-  min-height: 400px;
-  padding: 20px 0;
-}
-
-/* 大分類 */
-#proposal-container .tree-big {
-  margin-bottom: 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  background: #fff;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-#proposal-container .tree-big-title {
-  padding: 14px 18px;
-  background: linear-gradient(90deg, #e0f2fe, #f0f9ff);
-  color: #0c4a6e;
-  font-weight: 700;
-  cursor: pointer;
-  user-select: none;
-}
-
-#proposal-container .tree-big-title:hover {
-  background: linear-gradient(90deg, #bae6fd, #e0f2fe);
-}
-
-/* 初期状態は閉じる。!importantは絶対使わない */
-#proposal-container .tree-big-body {
-  padding: 12px 16px;
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  display: none;
-}
-
-/* 中分類 */
-#proposal-container .tree-mid {
-  margin-bottom: 8px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  background: #fff;
-}
-
-#proposal-container .tree-mid-title {
-  padding: 10px 14px;
-  background: #f1f5f9;
-  color: #334155;
-  font-weight: 600;
-  cursor: pointer;
-  user-select: none;
-}
-
-#proposal-container .tree-mid-title:hover {
-  background: #e2e8f0;
-}
-
-#proposal-container .tree-mid-body {
-  padding: 8px 12px;
-  display: none;
-}
-
-/* 投稿 */
-#proposal-container .tree-post {
-  margin: 6px 0;
-  padding: 10px 12px;
-  border-left: 3px solid #94a3b8;
-  background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-}
-
-#proposal-container .tree-post.merged {
-  border-left-color: #f59e0b;
-  background: #fffbeb;
-}
-
-#proposal-container .tree-post.original {
-  border-left-color: #64748b;
-  background: #f8fafc;
-}
-
-#proposal-container .tree-post-title {
-  cursor: pointer;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-#proposal-container .tree-post-body {
-  display: none;
-  padding: 10px;
-  margin-top: 8px;
-  background: #f8fafc;
-  border-radius: 6px;
-  font-size: 10pt;
-  line-height: 1.7;
-}
-
-#proposal-container .proposal-summary {
-  color: #475569;
-  white-space: pre-wrap;
-}
-
-#proposal-container .merge-info {
-  margin-top: 6px;
-  font-size: 9pt;
-  color: #64748b;
-  font-style: italic;
-}
-/* 最終勝者：何があっても閉じる */
-#proposal-container .tree-big-body,
-#proposal-container .tree-mid-body,
-#proposal-container .tree-post-body {
-  display: none !important;
-}
