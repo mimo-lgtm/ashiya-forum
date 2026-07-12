@@ -105,54 +105,41 @@ async function aiAnalysis() {
 }
 
 async function submitOpinion() {
-    const getVal = (id) => {
-        const el = document.getElementById(id);
-        return el ? el.value.trim() : "";
-    };
+  const title = document.getElementById("title").value.trim();
+  const summary = document.getElementById("summary").value.trim();
+  const content = document.getElementById("content").value.trim();
+  const bigCatName = document.getElementById("bigCatName").value.trim();
+  const midCatName = document.getElementById("midCatName").value.trim();
+  const author = document.getElementById("author").value.trim();
 
-    const title = getVal("title");
-    const summary = getVal("summary");
-    const content = getVal("content");
-    const bigCatName = getVal("bigCatName");
-    const midCatName = getVal("midCatName");
-    const author = getVal("author");
+  if (!title || !bigCatName) return alert("先にAI壁打ちを実行してください");
 
-    if (!title || !summary || !content) {
-        alert("タイトル・要約・内容を入力してください。先にAI壁打ちを実行してください。");
-        return;
-    }
-    if (!bigCatName || !midCatName) {
-        alert("分類が判定できませんでした。AI壁打ちをやり直してください。");
-        return;
-    }
+  // ★AI分析結果を丸ごと取る
+  const aiJsonText = document.getElementById("aiSummaryText").dataset.json || "{}";
+  
+  const res = await fetch(GAS_URL, {
+    method: "POST",
+    body: JSON.stringify({ 
+      action: "submit",  // あなたの330行版はsubmitのはず
+      title, 
+      summary, 
+      content, 
+      bigCatName, 
+      midCatName, 
+      author,
+      aiJson: JSON.parse(aiJsonText) // ★M列用に追加
+    })
+  });
+  const data = await res.json();
 
-    try {
-        const res = await fetch(GAS_URL, {
-            method: "POST",
-            body: JSON.stringify({
-                action: "submit",
-                title,
-                summary,
-                content,
-                bigCatName,
-                midCatName,
-                author
-            })
-        });
-        const data = await res.json();
-        console.log('GASからの返事:', data);
-
-        if (data.status == "success") {
-            await fetchOpinions();
-            alert("提案を登録しました");
-            clearForm();
-        } else {
-            alert(data.message || "登録に失敗しました");
-        }
-    } catch (err) {
-        console.error(err);
-        alert("通信エラー");
-    }
+  if (data.status === "success") {
+    await fetchOpinions();
+    alert("提案を登録しました");
+    clearForm();
+    document.getElementById('list-tab-btn')?.click();
+  } else {
+    alert("登録失敗: " + data.message);
+  }
 }
 
 async function fetchOpinions() {
