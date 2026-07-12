@@ -1,5 +1,5 @@
 // グローバル変数。2重読み込み対策済み
-var GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbz7_nn1uo5pr58A0uUm1VvxxcC3uiLdiDllXJf72T4Yv8gvdcrtr5KTEVxK8t3I_UJACg/exec";
+var GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbyv4Hp_R9RP29hlrDkreNbrxBcFbLtm7ajSjl2QmpJKnm1X2HaiibwkI0ahW4Osf71x6Q/exec";
 var allOpinions = window.allOpinions || [];
 
 const CATEGORY_MASTER = {
