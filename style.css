@@ -1,59 +1,9 @@
-body {
-    font-family: 'Noto Sans JP', sans-serif;
-    background-color: #f1f5f9;
-    color: #334155;
+/* style.css */
+:root {
+    --teal: #2f7a6b; --amber: #e8a33d; --violet: #6d5aa8;
 }
-
-/* タブ画像 */
-.tab-sub-image {
-    width: 100%;
-    max-height: 250px;
-    object-fit: cover;
-    border-radius: 12px;
-}
-
-/* =============================== */
-/* 提案箱ツリー */
-/* =============================== */
-
-#proposal-container {
-  font-size: 10.5pt;
-  width: 100%;
-  padding: 20px 0;
-}
-
-/* 大分類 */
-.big-toggle {
-  cursor: pointer;
-  user-select: none;
-}
-
-.big-content {
-  display: none;
-}
-
-/* 中分類 */
-.mid-toggle {
-  cursor: pointer;
-  user-select: none;
-}
-
-.mid-content {
-  display: none;
-}
-
-/* 投稿 */
-.post-toggle {
-  cursor: pointer;
-  user-select: none;
-}
-
-.post-content {
-  display: none;
-}
-
-/* ★重要：JSで開閉するため、絶対に display:none !important を使わない */
-
-/* =============================== */
-/* その他の既存デザインはそのまま */
-/* =============================== */
+body { font-family: 'Zen Kaku Gothic New', sans-serif; background: #eef0e4; }
+.topbar { background: #23282a; color: white; padding: 15px 20px; display: flex; justify-content: space-between; }
+.map-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 20px; }
+.cat-card { border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.update-body { display: none; margin-top: 12px; padding: 16px; background: #fff; border-radius: 8px; }
