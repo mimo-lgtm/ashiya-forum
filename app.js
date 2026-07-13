@@ -124,3 +124,4 @@ async function aiAnalysis() {
         document.getElementById("aiAssistBox").classList.remove("d-none");
     }
 }
+
