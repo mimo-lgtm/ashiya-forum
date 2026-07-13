@@ -196,7 +196,6 @@ function clearForm() {
 
  // ===============================
 // アイデアの地図（5分類×左右ボード）
-// ===============================
 function renderIdeaMap() {
     const container = document.getElementById("map-container");
     if (!container) return;
