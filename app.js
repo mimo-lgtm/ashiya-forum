@@ -1,17 +1,6 @@
 // ===============================
 // グローバル変数
 // ===============================
-function escapeHtml(str) {
-    if (!str) return "";
-    return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-}
-
-
 var GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbzC1QGiSuBZ0yzvsQVd9St0NbwxOOTanOilNesWl8A7vC83vKEzevLAq04wLOOXs1TPYg/exec";
 var allOpinions = [];
 
@@ -90,13 +79,13 @@ async function aiAnalysis() {
         document.getElementById("aiRefinedText").textContent = r["要約200"];
 
         document.getElementById("aiSummaryText").innerHTML = `
-<div class="mb-2"><span class="badge bg-info">大分類</span> ${escapeHtml(r.bigCatName)}</div>
-<div class="mb-3"><span class="badge bg-secondary">中分類</span> ${escapeHtml(r.midCatName)}</div>
-<b>核心</b><br>${escapeHtml(r["核心"])}<br><br>
-<b>期待される変化</b><br>${escapeHtml(r["変化"])}<br><br>
-<b>成功事例</b><br>${escapeHtml(r["成功事例"])}<br><br>
-<b>懸念点</b><br>${escapeHtml(r["懸念点"])}<br><br>
-<b>AIからの問い</b><br>${escapeHtml(r["問い"])}
+<div class="mb-2"><span class="badge bg-info">大分類</span> ${r.bigCatName}</div>
+<div class="mb-3"><span class="badge bg-secondary">中分類</span> ${r.midCatName}</div>
+<b>核心</b><br>${r["核心"]}<br><br>
+<b>期待される変化</b><br>${r["変化"]}<br><br>
+<b>成功事例</b><br>${r["成功事例"]}<br><br>
+<b>懸念点</b><br>${r["懸念点"]}<br><br>
+<b>AIからの問い</b><br>${r["問い"]}
 `;
 
         document.getElementById("aiPlaceholder")?.classList.add("d-none");
@@ -173,7 +162,7 @@ async function fetchOpinions() {
 }
 
 // ===============================
-// 提案箱ツリー描画（完全動作版）
+// 提案箱ツリー描画（escapeHtml 完全削除版）
 // ===============================
 function renderProposalTree(opinions) {
     const container = document.getElementById("proposal-container");
@@ -214,15 +203,15 @@ function renderProposalTree(opinions) {
                 postsHtml += `
 <div style="margin:6px 0; padding:10px 12px; border-left:3px solid ${borderColor}; background:#fff; border-radius:4px;">
   <div class="post-toggle" style="cursor:pointer; font-weight:600; color:#1e293b;">
-    ${icon} ${escapeHtml(post.title)}
+    ${icon} ${post.title}
   </div>
   <div class="post-content" style="display:none; padding:10px; margin-top:8px; background:#f8fafc; border-radius:6px; font-size:10pt; line-height:1.7;">
-    <div style="color:#475569; white-space:pre-wrap;">${escapeHtml(post.summary)}</div>
-    ${post.mergeTitle ? `<div class="merge-info" style="margin-top:6px; font-size:9pt; color:#64748b;">統合先：${escapeHtml(post.mergeTitle)}</div>` : ""}
-    ${post.mergeReason ? `<div style="margin-top:6px; font-size:9pt; color:#64748b;">統合理由：${escapeHtml(post.mergeReason)}</div>` : ""}
-    ${post.crossAnalysis ? `<div style="margin-top:6px; font-size:9pt; color:#475569;">クロス分析：${escapeHtml(post.crossAnalysis)}</div>` : ""}
-    ${post.layoutReason ? `<div style="margin-top:6px; font-size:9pt; color:#475569;">配置理由：${escapeHtml(post.layoutReason)}</div>` : ""}
-    ${post.authorId ? `<div style="margin-top:6px; font-size:9pt; color:#334155;">投稿者ID：${escapeHtml(post.authorId)}</div>` : ""}
+    <div style="color:#475569; white-space:pre-wrap;">${post.summary}</div>
+    ${post.mergeTitle ? `<div class="merge-info" style="margin-top:6px; font-size:9pt; color:#64748b;">統合先：${post.mergeTitle}</div>` : ""}
+    ${post.mergeReason ? `<div style="margin-top:6px; font-size:9pt; color:#64748b;">統合理由：${post.mergeReason}</div>` : ""}
+    ${post.crossAnalysis ? `<div style="margin-top:6px; font-size:9pt; color:#475569;">クロス分析：${post.crossAnalysis}</div>` : ""}
+    ${post.layoutReason ? `<div style="margin-top:6px; font-size:9pt; color:#475569;">配置理由：${post.layoutReason}</div>` : ""}
+    ${post.authorId ? `<div style="margin-top:6px; font-size:9pt; color:#334155;">投稿者ID：${post.authorId}</div>` : ""}
   </div>
 </div>
 `;
