@@ -39,12 +39,17 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btnAiAnalysis")?.addEventListener("click", aiAnalysis);
     document.getElementById("btnSubmitToBox")?.addEventListener("click", submitOpinion);
 
+    // 提案箱タブ
     document.getElementById('list-tab-btn')?.addEventListener('shown.bs.tab', () => {
         renderProposalTree(allOpinions);
     });
-  renderIdeaMap();
 
+    // ★ アイデアの地図タブ（必須）
+    document.getElementById('map-tab-btn')?.addEventListener('shown.bs.tab', () => {
+        renderIdeaMap();
+    });
 });
+
 
 // ===============================
 // AI壁打ち
