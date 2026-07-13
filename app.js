@@ -175,8 +175,6 @@ function renderProposalTree(opinions) {
     container.innerHTML = '';
     container.style.cssText = 'font-size:10.5pt; width:100%; padding:20px 0;';
 
-    let totalCount = 0;
-
     Object.keys(CATEGORY_MASTER).forEach(bigId => {
         const big = CATEGORY_MASTER[bigId].name;
         const mids = CATEGORY_MASTER[bigId].mids;
@@ -191,7 +189,6 @@ function renderProposalTree(opinions) {
                 const oBig = (o.bigCatName || "").split("（")[0];
                 const bigName = big.split("（")[0];
                 const oMid = (o.midCatName || "").trim();
-
                 return oBig === bigName && oMid === mid;
             });
 
@@ -199,15 +196,15 @@ function renderProposalTree(opinions) {
             bigCount += matched.length;
 
             let postsHtml = "";
-matched.forEach(post => {
+            matched.forEach(post => {
 
-    let icon = "📝";
-    let borderColor = "#94a3b8";
+                let icon = "📝";
+                let borderColor = "#94a3b8";
 
-    if (post.status === "新統合") { icon = "⭐"; borderColor = "#f59e0b"; }
-    if (post.status === "元記事") { icon = "📄"; borderColor = "#64748b"; }
+                if (post.status === "新統合") { icon = "⭐"; borderColor = "#f59e0b"; }
+                if (post.status === "元記事") { icon = "📄"; borderColor = "#64748b"; }
 
-    postsHtml += `
+                postsHtml += `
 <div style="margin:6px 0; padding:10px 12px; border-left:3px solid ${borderColor}; background:#fff; border-radius:4px;">
   <div class="post-toggle" style="cursor:pointer; font-weight:600; color:#1e293b;">
     ${icon} ${escapeHtml(post.title)}
@@ -228,4 +225,21 @@ matched.forEach(post => {
   </div>
 </div>
 `;
-});
+            });
+
+            bigHtml += `
+<div style="margin-bottom:20px;">
+  <h5 style="font-weight:700; color:#1e293b;">${mid}（${matched.length}件）</h5>
+  ${postsHtml}
+</div>
+`;
+        });
+
+        container.innerHTML += `
+<div style="margin-bottom:40px;">
+  <h4 style="font-weight:800; color:#0f172a;">${big}（${bigCount}件）</h4>
+  ${bigHtml}
+</div>
+`;
+    });
+}
