@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>市民の声でつくる、芦屋の明日</title>
 <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-/* style.css 完全版は下に別途記載 */
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="topbar">
@@ -29,9 +27,9 @@
   <!-- 声を届ける -->
   <section id="assist" class="page">
     <h2>🤖 声を届ける</h2>
-    <textarea id="voiceInput" placeholder="芦屋について思っていることを自由に書いてください..."></textarea>
+    <textarea id="voiceInput" placeholder="芦屋について思っていることを自由に書いてください..."></textarea><br><br>
     <button class="primary" onclick="runAI()">AIで分析する</button>
-    <div id="analysisResult"></div>
+    <div id="analysisResult" style="margin-top:30px;"></div>
   </section>
 
   <!-- 声のボード -->
