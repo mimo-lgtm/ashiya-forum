@@ -133,7 +133,7 @@ async function submitOpinion() {
         if (data.status === "success") {
             await fetchOpinions();
             alert("提案を登録しました");
-            clearForm();
+         
         } else {
             alert(data.message || "登録に失敗しました");
         }
