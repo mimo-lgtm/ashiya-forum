@@ -42,6 +42,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('list-tab-btn')?.addEventListener('shown.bs.tab', () => {
         renderProposalTree(allOpinions);
     });
+  renderIdeaMap();
+
 });
 
 // ===============================
@@ -247,4 +249,16 @@ function clearForm() {
     // AI結果表示を初期状態に戻す
     document.getElementById("aiAssistBox")?.classList.add("d-none");
     document.getElementById("aiPlaceholder")?.classList.remove("d-none");
+}
+function renderIdeaMap() {
+    const container = document.getElementById("map-container");
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="p-4 bg-light border rounded">
+            <h4 class="fw-bold mb-3">🗺️ アイデアの地図</h4>
+            <p class="text-muted">ここに AI が分類したアイデアの地図が表示されます。</p>
+            <p class="small">※ 現在は簡易版の表示です。分類ロジックを追加すると地図が進化します。</p>
+        </div>
+    `;
 }
