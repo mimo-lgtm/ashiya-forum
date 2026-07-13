@@ -31,6 +31,17 @@ const CATEGORY_MASTER = {
 };
 
 // ===============================
+// 300字固定文（アイデアの地図 左側）
+// ===============================
+const AI_BASE_SUMMARY = {
+    "まちづくり・都市計画（住みやすさの基盤）": "芦屋市は六甲山と海に囲まれた恵まれた地形を活かし、住宅地としての品格と防災機能を両立するまちづくりが求められます。老朽化したインフラの計画的更新、駅周辺の回遊性向上、バリアフリー化を進めます。子育て世代と高齢者が安心して暮らせるよう、公園・緑地の再整備と防災拠点機能の強化を図ります。民間活力の導入により、芦屋川沿いの景観を活かした魅力ある都市空間を創出し、持続可能な住環境を実現します。",
+    "子育て・教育環境（次世代を育てるまち）": "子どもたちが自ら学び、挑戦できる環境整備が急務です。画一的な教育から脱却し、個性と探究心を伸ばすプロジェクト型学習を導入します。保育士・教員のファシリテーター研修を強化し、ICT活用と体験学習を組み合わせます。放課後の居場所づくりと地域人材の参画により、学校・家庭・地域が連携した教育エコシステムを構築し、芦屋から世界で活躍する人材を育成します。",
+    "福祉・健康・共生（誰も取り残さないまち）": "高齢化が進む芦屋市では、医療・介護・予防が一体となった地域包括ケアの深化が必要です。在宅医療の充実、認知症支援、介護予防事業を強化します。障害の有無や国籍に関わらず誰もが活躍できるよう、ユニバーサルデザインのまちづくりと就労支援を推進します。地域のつながりを再構築し、孤立を防ぐ見守りネットワークと多世代交流拠点を整備し、共生社会を実現します。",
+    "環境・持続可能性（未来に繋ぐ芦屋）": "2050年カーボンニュートラル実現に向け、芦屋市は率先して脱炭素化を進めます。公共施設のZEB化、太陽光発電の導入拡大、EV充電インフラ整備を加速します。ごみの削減と資源循環を徹底し、プラスチック・食品ロス対策を強化します。六甲山系の豊かな自然環境を保全し、生物多様性を守ります。市民・事業者・行政が一体となり、環境先進都市として次世代に美しい芦屋を引き継ぎます。",
+    "行政・市民参加・活力（未来を拓く力）": "市民と行政の協働により、芦屋の新たな価値を創造します。デジタル技術を活用した行政手続きのオンライン化と、データに基づく政策立案を推進します。市民参加型の予算編成やワークショップを拡充し、多様な声を市政に反映します。文化・芸術・スポーツ振興により都市の魅力を高め、スタートアップ支援と観光施策で地域経済を活性化します。透明で効率的な行財政運営により、持続可能な市政を実現します。"
+};
+
+// ===============================
 // 初期化
 // ===============================
 document.addEventListener("DOMContentLoaded", () => {
@@ -44,12 +55,11 @@ document.addEventListener("DOMContentLoaded", () => {
         renderProposalTree(allOpinions);
     });
 
-    // ★ アイデアの地図タブ（必須）
+    // アイデアの地図タブ
     document.getElementById('map-tab-btn')?.addEventListener('shown.bs.tab', () => {
         renderIdeaMap();
     });
 });
-
 
 // ===============================
 // AI壁打ち
@@ -169,7 +179,7 @@ async function fetchOpinions() {
 }
 
 // ===============================
-// 提案箱ツリー描画（escapeHtml 完全削除版）
+// 提案箱ツリー描画
 // ===============================
 function renderProposalTree(opinions) {
     const container = document.getElementById("proposal-container");
@@ -209,140 +219,3 @@ function renderProposalTree(opinions) {
 
                 postsHtml += `
 <div style="margin:6px 0; padding:10px 12px; border-left:3px solid ${borderColor}; background:#fff; border-radius:4px;">
-  <div class="post-toggle" style="cursor:pointer; font-weight:600; color:#1e293b;">
-    ${icon} ${post.title}
-  </div>
-  <div class="post-content" style="display:none; padding:10px; margin-top:8px; background:#f8fafc; border-radius:6px; font-size:10pt; line-height:1.7;">
-    <div style="color:#475569; white-space:pre-wrap;">${post.summary}</div>
-    ${post.mergeTitle ? `<div class="merge-info" style="margin-top:6px; font-size:9pt; color:#64748b;">統合先：${post.mergeTitle}</div>` : ""}
-    ${post.mergeReason ? `<div style="margin-top:6px; font-size:9pt; color:#64748b;">統合理由：${post.mergeReason}</div>` : ""}
-    ${post.crossAnalysis ? `<div style="margin-top:6px; font-size:9pt; color:#475569;">クロス分析：${post.crossAnalysis}</div>` : ""}
-    ${post.layoutReason ? `<div style="margin-top:6px; font-size:9pt; color:#475569;">配置理由：${post.layoutReason}</div>` : ""}
-    ${post.authorId ? `<div style="margin-top:6px; font-size:9pt; color:#334155;">投稿者ID：${post.authorId}</div>` : ""}
-  </div>
-</div>
-`;
-            });
-
-            bigHtml += `
-<div style="margin-bottom:20px;">
-  <h5 style="font-weight:700; color:#1e293b;">${mid}（${matched.length}件）</h5>
-  ${postsHtml}
-</div>
-`;
-        });
-
-        container.innerHTML += `
-<div style="margin-bottom:40px;">
-  <h4 style="font-weight:800; color:#0f172a;">${big}（${bigCount}件）</h4>
-  ${bigHtml}
-</div>
-`;
-    });
-}
-function clearForm() {
-    const ids = ["title", "summary", "content", "bigCatName", "midCatName", "author"];
-    ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = "";
-    });
-
-    // 入力欄もクリア
-    const contentEl = document.getElementById("content");
-    if (contentEl) contentEl.value = "";
-
-    // AI結果表示を初期状態に戻す
-    document.getElementById("aiAssistBox")?.classList.add("d-none");
-    document.getElementById("aiPlaceholder")?.classList.remove("d-none");
-}
-function renderIdeaMap() {
-    const container = document.getElementById("map-container");
-    if (!container) return;
-
-    container.innerHTML = ""; // 初期化
-
-    Object.keys(CATEGORY_MASTER).forEach(bigId => {
-        const bigName = CATEGORY_MASTER[bigId].name;
-
-        // 300字固定文
-        const baseText = AI_BASE_SUMMARY[bigName] || "（固定文が設定されていません）";
-
-        // 大分類に属する投稿を抽出
-        const posts = allOpinions.filter(o => {
-            const oBig = (o.bigCatName || "").split("（")[0];
-            const bigBase = bigName.split("（")[0];
-            return oBig === bigBase;
-        });
-
-        // 50%：元記事（status が空 or "元記事"）
-        const originals = posts.filter(p => !p.status || p.status === "元記事");
-
-        // 50%：新統合
-        const merged = posts.filter(p => p.status === "新統合");
-
-        // 内容ベースで半々 → 文章を結合
-        const originalText = originals.map(p => `● ${p.title}\n${p.summary}`).join("\n\n");
-        const mergedText = merged.map(p => `★ ${p.title}\n${p.summary}`).join("\n\n");
-
-        const combinedText = `
-【元記事（50%）】
-${originalText || "該当する投稿がありません"}
-
-【新統合（50%）】
-${mergedText || "該当する投稿がありません"}
-        `.trim();
-
-        // HTML構築
-        const block = document.createElement("div");
-        block.className = "mb-5";
-
-        block.innerHTML = `
-            <h4 class="fw-bold mb-3">${bigName}</h4>
-
-            <div class="row g-4">
-
-                <!-- 左：未来提案の原点 -->
-                <div class="col-md-6">
-                    <div class="p-3 bg-light border rounded h-100">
-                        <h5 class="fw-bold mb-2">🌱 未来提案の原点（アイデアの地図）</h5>
-                        <p class="small" style="white-space:pre-wrap;">${baseText}</p>
-                    </div>
-                </div>
-
-                <!-- 右：提案集約・共創アップデート案 -->
-                <div class="col-md-6">
-                    <div class="p-3 bg-white border rounded h-100">
-                        <h5 class="fw-bold mb-2">🤝 提案集約・共創アップデート案</h5>
-
-                        <button class="btn btn-primary btn-sm mb-3 update-btn">
-                            🔄 アップデートを表示
-                        </button>
-
-                        <div class="update-content d-none" style="white-space:pre-wrap;">
-                            ${combinedText}
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        `;
-
-        container.appendChild(block);
-
-        // ボタン動作
-        const btn = block.querySelector(".update-btn");
-        const content = block.querySelector(".update-content");
-
-        btn.addEventListener("click", () => {
-            const isHidden = content.classList.contains("d-none");
-            if (isHidden) {
-                content.classList.remove("d-none");
-                btn.textContent = "❌ 閉じる";
-            } else {
-                content.classList.add("d-none");
-                btn.textContent = "🔄 アップデートを表示";
-            }
-        });
-    });
-}
-
