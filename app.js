@@ -248,7 +248,6 @@ ${mergedText || "該当する投稿がありません"}
                         <p class="small" style="white-space:pre-wrap;">${baseText}</p>
                     </div>
                 </div>
-
                 <!-- 右：提案集約・共創アップデート案 -->
                 <div class="col-md-6">
                     <div class="p-3 bg-white border rounded h-100">
@@ -285,9 +284,3 @@ ${mergedText || "該当する投稿がありません"}
         });
     });
 }
-                
-
-                 
-
-
-                          
