@@ -1,5 +1,5 @@
 // app.js 修正版（ホーム表示 + ボタン動作確認済み）
-const GAS_URL = "https://script.google.com/macros/s/あなたのGAS_URL/exec"; // ← 必ず変更
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzhgqr0kNu0e53XuiTnB4wSS1N8n279GLGoT2iiiowWD7owb9U5pj6nL01eO_QTF0DHKg/exec"; // ← 必ず変更
 
 const CATEGORY_MASTER = {
   "BIG-1": { name: "まちづくり・都市計画（住みやすさの基盤）", base: "芦屋市は六甲山と海に囲まれた恵まれた地形を活かし..." },
