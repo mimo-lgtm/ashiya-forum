@@ -50,69 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btnAiAnalysis")?.addEventListener("click", aiAnalysis);
     document.getElementById("btnSubmitToBox")?.addEventListener("click", submitOpinion);
 
-    // 提案箱タブ
-    document.getElementById('list-tab-btn')?.addEventListener('shown.bs.tab', () => {
-        renderProposalTree(allOpinions);
-    });
-
-    // アイデアの地図タブ
-    document.getElementById('map-tab-btn')?.addEventListener('shown.bs.tab', () => {
-        renderIdeaMap();
-    });
-});
-
-// ===============================
-// AI壁打ち
-// ===============================
-async function aiAnalysis() {
-    const contentEl = document.getElementById("content");
-    const content = contentEl.value.trim();
-    if (!content) return alert("内容を入力してください。");
-
-    try {
-        const res = await fetch(GAS_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "analyze", content })
-        });
-        const data = await res.json();
-
-        if (data.status !== "success") {
-            alert(data.message || "AI解析に失敗しました");
-            return;
-        }
-
-        const r = data.result;
-
-        const setVal = (id, val) => {
-            const el = document.getElementById(id);
-            if (el) el.value = val || "";
-        };
-        setVal("title", r["推奨タイトル"]);
-        setVal("summary", r["要約200"]);
-        setVal("bigCatName", r.bigCatName);
-        setVal("midCatName", r.midCatName);
-
-        document.getElementById("aiTitleText").textContent = r["推奨タイトル"];
-        document.getElementById("aiRefinedText").textContent = r["要約200"];
-
-        document.getElementById("aiSummaryText").innerHTML = `
-<div class="mb-2"><span class="badge bg-info">大分類</span> ${r.bigCatName}</div>
-<div class="mb-3"><span class="badge bg-secondary">中分類</span> ${r.midCatName}</div>
-<b>核心</b><br>${r["核心"]}<br><br>
-<b>期待される変化</b><br>${r["変化"]}<br><br>
-<b>成功事例</b><br>${r["成功事例"]}<br><br>
-<b>懸念点</b><br>${r["懸念点"]}<br><br>
-<b>AIからの問い</b><br>${r["問い"]}
-`;
-
-        document.getElementById("aiPlaceholder")?.classList.add("d-none");
-        document.getElementById("aiAssistBox")?.classList.remove("d-none");
-
-    } catch (err) {
-        console.error(err);
-        alert("AI通信エラー");
-    }
-}
+    document.getElementById('list-tab-btn')?.addEventListener
 
 // ===============================
 // 投稿
@@ -150,7 +88,6 @@ async function submitOpinion() {
         if (data.status === "success") {
             await fetchOpinions();
             alert("提案を登録しました");
-         
         } else {
             alert(data.message || "登録に失敗しました");
         }
@@ -255,20 +192,9 @@ function renderProposalTree(opinions) {
 // フォームクリア
 // ===============================
 function clearForm() {
-    const ids = ["title", "summary", "content", "bigCatName", "midCatName", "author"];
-    ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = "";
-    });
+    const ids = ["title", "summary", "content", "bigCatName",
 
-    const contentEl = document.getElementById("content");
-    if (contentEl) contentEl.value = "";
-
-    document.getElementById("aiAssistBox")?.classList.add("d-none");
-    document.getElementById("aiPlaceholder")?.classList.remove("d-none");
-}
-
-// ===============================
+ // ===============================
 // アイデアの地図（5分類×左右ボード）
 // ===============================
 function renderIdeaMap() {
@@ -317,4 +243,51 @@ ${mergedText || "該当する投稿がありません"}
 
                 <!-- 左：未来提案の原点 -->
                 <div class="col-md-6">
-                    <div class="p-3
+                    <div class="p-3 bg-light border rounded h-100">
+                        <h5 class="fw-bold mb-2">🌱 未来提案の原点（アイデアの地図）</h5>
+                        <p class="small" style="white-space:pre-wrap;">${baseText}</p>
+                    </div>
+                </div>
+
+                <!-- 右：提案集約・共創アップデート案 -->
+                <div class="col-md-6">
+                    <div class="p-3 bg-white border rounded h-100">
+                        <h5 class="fw-bold mb-2">🤝 提案集約・共創アップデート案</h5>
+
+                        <button class="btn btn-primary btn-sm mb-3 update-btn">
+                            🔄 アップデートを表示
+                        </button>
+
+                        <div class="update-content d-none" style="white-space:pre-wrap;">
+                            ${combinedText}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        `;
+
+        container.appendChild(block);
+
+        // ボタン動作
+        const btn = block.querySelector(".update-btn");
+        const content = block.querySelector(".update-content");
+
+        btn.addEventListener("click", () => {
+            const isHidden = content.classList.contains("d-none");
+            if (isHidden) {
+                content.classList.remove("d-none");
+                btn.textContent = "❌ 閉じる";
+            } else {
+                content.classList.add("d-none");
+                btn.textContent = "🔄 アップデートを表示";
+            }
+        });
+    });
+}
+                
+
+                 
+
+
+                          
