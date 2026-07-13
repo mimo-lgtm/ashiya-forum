@@ -86,3 +86,41 @@ window.onload = () => {
   renderHome();
   showPage('home');
 };
+
+// 中分類の日本語名を表示するためのマスター（GASと同期）
+const CATEGORY_MASTER = {
+  "BIG-1": { name: "まちづくり・都市計画", mids: { "MID-1": "住宅・まちなみ", "MID-2": "交通・移動手段", "MID-3": "公園・緑地・景観", "MID-4": "防災・レジリエンス", "MID-5": "その他" } },
+  "BIG-2": { name: "子育て・教育環境", mids: { "MID-1": "保育・教育施設", "MID-2": "子ども・若者の居場所", "MID-3": "学びの機会", "MID-4": "家族支援", "MID-5": "その他" } },
+  "BIG-3": { name: "福祉・健康・共生", mids: { "MID-1": "高齢者支援", "MID-2": "障害者支援", "MID-3": "健康づくり", "MID-4": "地域コミュニティ", "MID-5": "その他" } },
+  "BIG-4": { name: "環境・持続可能性", mids: { "MID-1": "気候変動対策", "MID-2": "資源循環", "MID-3": "自然環境保全", "MID-4": "エネルギー", "MID-5": "その他" } },
+  "BIG-5": { name: "行政・市民参加・活力", mids: { "MID-1": "行政の透明性", "MID-2": "市民参加", "MID-3": "文化・スポーツ", "MID-4": "産業・雇用", "MID-5": "その他" } }
+};
+
+// AI分析後の表示（150-200字対応）
+async function aiAnalysis() {
+    // ... (既存のfetch部分はそのまま)
+
+    if (data.status === "success") {
+        currentAiResult = data.result;
+        
+        const big = CATEGORY_MASTER[currentAiResult.bigCatId];
+        const bigName = big ? big.name : currentAiResult.bigCatName || "その他";
+        const midName = big && big.mids[currentAiResult.midCatId] ? big.mids[currentAiResult.midCatId] : currentAiResult.midCatName || "その他";
+
+        // 分析結果表示
+        document.getElementById("aiSummaryText").innerHTML = `
+            <strong>【自動分類】</strong> ${bigName} ＞ ${midName}<br><br>
+            <strong>核心</strong><br>${currentAiResult["核心"] || ""}<br><br>
+            <strong>期待される変化</strong><br>${currentAiResult["変化"] || ""}<br><br>
+            <strong>成功事例</strong><br>${currentAiResult["成功事例"] || ""}<br><br>
+            <strong>懸念点</strong><br>${currentAiResult["懸念点"] || ""}<br><br>
+            <strong>発展的な問い</strong><br>${currentAiResult["問い"] || ""}
+        `;
+
+        document.getElementById("aiTitleText").textContent = currentAiResult["推奨タイトル"] || "無題の提案";
+        document.getElementById("aiRefinedText").textContent = currentAiResult["要約200"] || "";
+
+        document.getElementById("aiPlaceholder").classList.add("d-none");
+        document.getElementById("aiAssistBox").classList.remove("d-none");
+    }
+}
