@@ -30,6 +30,27 @@
     <textarea id="voiceInput" placeholder="芦屋について思っていることを自由に書いてください..."></textarea><br><br>
     <button class="primary" onclick="runAI()">AIで分析する</button>
     <div id="analysisResult" style="margin-top:30px;"></div>
+<div class="col-lg-5">
+    <div class="card shadow-sm border-0 p-4 h-100" style="border-radius: 12px;">
+        <h5 class="fw-bold text-dark mb-3">🖋️ あなたの声</h5>
+        <textarea class="form-control" id="content" rows="14" style="resize: none; font-size: 15px;" placeholder="芦屋市について感じていること、提案したいことを自由に書いてください..."></textarea>
+        <button id="btnAiAnalysis" class="btn btn-primary w-100 mt-3 py-3 fw-bold">✨ AIと壁打ちする</button>
+    </div>
+</div>
+
+<div class="col-lg-7">
+    <div id="aiAssistBox" class="card shadow-sm border-0 p-4 h-100 bg-white d-none" style="border-radius: 12px;">
+        <div id="aiSummaryText" class="p-3 mb-3 bg-light rounded" style="min-height: 320px; overflow-y: auto;"></div>
+        
+        <div class="p-3 bg-light rounded mb-3">
+            <div class="mb-2"><span class="badge bg-dark">推奨タイトル</span></div>
+            <div id="aiTitleText" class="fw-bold fs-5"></div>
+        </div>
+        
+        <button id="btnSubmitToBox" class="btn btn-success w-100 py-3 fw-bold">📥 この内容で提案箱へ投稿する</button>
+    </div>
+</div>
+    
   </section>
 
   <!-- 声のボード -->
