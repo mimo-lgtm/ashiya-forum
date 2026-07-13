@@ -259,11 +259,90 @@ function renderIdeaMap() {
     const container = document.getElementById("map-container");
     if (!container) return;
 
-    container.innerHTML = `
-        <div class="p-4 bg-light border rounded">
-            <h4 class="fw-bold mb-3">🗺️ アイデアの地図</h4>
-            <p class="text-muted">ここに AI が分類したアイデアの地図が表示されます。</p>
-            <p class="small">※ 現在は簡易版の表示です。分類ロジックを追加すると地図が進化します。</p>
-        </div>
-    `;
+    container.innerHTML = ""; // 初期化
+
+    Object.keys(CATEGORY_MASTER).forEach(bigId => {
+        const bigName = CATEGORY_MASTER[bigId].name;
+
+        // 300字固定文
+        const baseText = AI_BASE_SUMMARY[bigName] || "（固定文が設定されていません）";
+
+        // 大分類に属する投稿を抽出
+        const posts = allOpinions.filter(o => {
+            const oBig = (o.bigCatName || "").split("（")[0];
+            const bigBase = bigName.split("（")[0];
+            return oBig === bigBase;
+        });
+
+        // 50%：元記事（status が空 or "元記事"）
+        const originals = posts.filter(p => !p.status || p.status === "元記事");
+
+        // 50%：新統合
+        const merged = posts.filter(p => p.status === "新統合");
+
+        // 内容ベースで半々 → 文章を結合
+        const originalText = originals.map(p => `● ${p.title}\n${p.summary}`).join("\n\n");
+        const mergedText = merged.map(p => `★ ${p.title}\n${p.summary}`).join("\n\n");
+
+        const combinedText = `
+【元記事（50%）】
+${originalText || "該当する投稿がありません"}
+
+【新統合（50%）】
+${mergedText || "該当する投稿がありません"}
+        `.trim();
+
+        // HTML構築
+        const block = document.createElement("div");
+        block.className = "mb-5";
+
+        block.innerHTML = `
+            <h4 class="fw-bold mb-3">${bigName}</h4>
+
+            <div class="row g-4">
+
+                <!-- 左：未来提案の原点 -->
+                <div class="col-md-6">
+                    <div class="p-3 bg-light border rounded h-100">
+                        <h5 class="fw-bold mb-2">🌱 未来提案の原点（アイデアの地図）</h5>
+                        <p class="small" style="white-space:pre-wrap;">${baseText}</p>
+                    </div>
+                </div>
+
+                <!-- 右：提案集約・共創アップデート案 -->
+                <div class="col-md-6">
+                    <div class="p-3 bg-white border rounded h-100">
+                        <h5 class="fw-bold mb-2">🤝 提案集約・共創アップデート案</h5>
+
+                        <button class="btn btn-primary btn-sm mb-3 update-btn">
+                            🔄 アップデートを表示
+                        </button>
+
+                        <div class="update-content d-none" style="white-space:pre-wrap;">
+                            ${combinedText}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        `;
+
+        container.appendChild(block);
+
+        // ボタン動作
+        const btn = block.querySelector(".update-btn");
+        const content = block.querySelector(".update-content");
+
+        btn.addEventListener("click", () => {
+            const isHidden = content.classList.contains("d-none");
+            if (isHidden) {
+                content.classList.remove("d-none");
+                btn.textContent = "❌ 閉じる";
+            } else {
+                content.classList.add("d-none");
+                btn.textContent = "🔄 アップデートを表示";
+            }
+        });
+    });
 }
+
