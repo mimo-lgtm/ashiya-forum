@@ -5,7 +5,7 @@ var GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbzC1QGi
 var allOpinions = [];
 
 // ===============================
-// カテゴリマスター（code.gs と一致）
+// カテゴリマスター
 // ===============================
 const CATEGORY_MASTER = {
   "BIG-1": { 
@@ -34,13 +34,11 @@ const CATEGORY_MASTER = {
 // 初期化
 // ===============================
 document.addEventListener("DOMContentLoaded", () => {
-
     fetchOpinions();
 
     document.getElementById("btnAiAnalysis")?.addEventListener("click", aiAnalysis);
     document.getElementById("btnSubmitToBox")?.addEventListener("click", submitOpinion);
 
-    // タブ3が開かれたら再描画
     document.getElementById('list-tab-btn')?.addEventListener('shown.bs.tab', () => {
         renderProposalTree(allOpinions);
     });
@@ -68,7 +66,6 @@ async function aiAnalysis() {
 
         const r = data.result;
 
-        // hidden input に保存
         const setVal = (id, val) => {
             const el = document.getElementById(id);
             if (el) el.value = val || "";
@@ -78,7 +75,6 @@ async function aiAnalysis() {
         setVal("bigCatName", r.bigCatName);
         setVal("midCatName", r.midCatName);
 
-        // 表示
         document.getElementById("aiTitleText").textContent = r["推奨タイトル"];
         document.getElementById("aiRefinedText").textContent = r["要約200"];
 
@@ -166,7 +162,7 @@ async function fetchOpinions() {
 }
 
 // ===============================
-// 提案箱ツリー描画
+// 提案箱ツリー描画（完全動作版）
 // ===============================
 function renderProposalTree(opinions) {
     const container = document.getElementById("proposal-container");
@@ -209,18 +205,12 @@ function renderProposalTree(opinions) {
   <div class="post-toggle" style="cursor:pointer; font-weight:600; color:#1e293b;">
     ${icon} ${escapeHtml(post.title)}
   </div>
-
   <div class="post-content" style="display:none; padding:10px; margin-top:8px; background:#f8fafc; border-radius:6px; font-size:10pt; line-height:1.7;">
     <div style="color:#475569; white-space:pre-wrap;">${escapeHtml(post.summary)}</div>
-
     ${post.mergeTitle ? `<div class="merge-info" style="margin-top:6px; font-size:9pt; color:#64748b;">統合先：${escapeHtml(post.mergeTitle)}</div>` : ""}
-
     ${post.mergeReason ? `<div style="margin-top:6px; font-size:9pt; color:#64748b;">統合理由：${escapeHtml(post.mergeReason)}</div>` : ""}
-
     ${post.crossAnalysis ? `<div style="margin-top:6px; font-size:9pt; color:#475569;">クロス分析：${escapeHtml(post.crossAnalysis)}</div>` : ""}
-
     ${post.layoutReason ? `<div style="margin-top:6px; font-size:9pt; color:#475569;">配置理由：${escapeHtml(post.layoutReason)}</div>` : ""}
-
     ${post.authorId ? `<div style="margin-top:6px; font-size:9pt; color:#334155;">投稿者ID：${escapeHtml(post.authorId)}</div>` : ""}
   </div>
 </div>
