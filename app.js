@@ -1,5 +1,5 @@
 // app.js 完全版
-const GAS_URL = "あなたのGAS再デプロイURLをここに入れてください";  // ← 必須
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzhgqr0kNu0e53XuiTnB4wSS1N8n279GLGoT2iiiowWD7owb9U5pj6nL01eO_QTF0DHKg/exec";  // ← 必須
 
 const CATEGORY_MASTER = {
   "BIG-1": { name: "まちづくり・都市計画", mids: { "MID-1": "住宅・まちなみ", "MID-2": "交通・移動手段", "MID-3": "公園・緑地・景観", "MID-4": "防災・レジリエンス", "MID-5": "その他" } },
@@ -76,5 +76,61 @@ async function loadBoard() {
 // 初期化
 window.onload = () => {
   showPage('home');
+
+
+  // app.js（ホーム5大分類×2列 完全実装）
+const CATEGORY_MASTER = {
+  "BIG-1": { name: "まちづくり・都市計画（住みやすさの基盤）", base: "芦屋市は六甲山と海に囲まれた恵まれた地形を活かし..." },
+  "BIG-2": { name: "子育て・教育環境（次世代を育てるまち）", base: "子どもたちが自ら学び、挑戦できる環境整備が急務です..." },
+  "BIG-3": { name: "福祉・健康・共生（誰も取り残さないまち）", base: "高齢化が進む芦屋市では..." },
+  "BIG-4": { name: "環境・持続可能性（未来に繋ぐ芦屋）", base: "2050年カーボンニュートラル実現に向け..." },
+  "BIG-5": { name: "行政・市民参加・活力（未来を拓く力）", base: "市民と行政の協働により..." }
+};
+
+// ホーム5大分類×2列描画
+function renderHomeCategories() {
+  const container = document.getElementById('homeCategories');
+  container.innerHTML = '';
+
+  Object.keys(CATEGORY_MASTER).forEach(key => {
+    const cat = CATEGORY_MASTER[key];
+    const div = document.createElement('div');
+    div.className = 'cat-card';
+    div.innerHTML = `
+      <div class="cat-header">${cat.name}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:20px;">
+        <!-- 左: 未来提案の原点 -->
+        <div class="map-left">
+          <strong>未来提案の原点（アイデアの地図）</strong>
+          <p style="margin-top:12px;font-size:0.95em;line-height:1.8;">${cat.base}</p>
+        </div>
+        <!-- 右: アップデート -->
+        <div class="update-right">
+          <strong>提案集約・共創アップデート案</strong><br><br>
+          <button class="update-btn" onclick="toggleUpdate(this, '${key}')">アップデートを表示</button>
+          <div class="update-body" id="update-${key}">
+            ここに市民の新統合提案（50%）＋初期提案（50%）がリアルタイムで表示されます。
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function toggleUpdate(btn, key) {
+  const body = document.getElementById(`update-${key}`);
+  if (body) {
+    const isHidden = body.style.display === 'none' || !body.style.display;
+    body.style.display = isHidden ? 'block' : 'none';
+    btn.textContent = isHidden ? '閉じる' : 'アップデートを表示';
+  }
+}
+
+// 初期化
+window.onload = () => {
+  renderHomeCategories();
+  showPage('home');
+};
   // ホームの5大分類描画処理など
 };
