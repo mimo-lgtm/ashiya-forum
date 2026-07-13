@@ -233,3 +233,18 @@ function renderProposalTree(opinions) {
 `;
     });
 }
+function clearForm() {
+    const ids = ["title", "summary", "content", "bigCatName", "midCatName", "author"];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+    });
+
+    // 入力欄もクリア
+    const contentEl = document.getElementById("content");
+    if (contentEl) contentEl.value = "";
+
+    // AI結果表示を初期状態に戻す
+    document.getElementById("aiAssistBox")?.classList.add("d-none");
+    document.getElementById("aiPlaceholder")?.classList.remove("d-none");
+}
