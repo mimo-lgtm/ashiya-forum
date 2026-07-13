@@ -1,7 +1,7 @@
 // ===============================
 // グローバル変数
 // ===============================
-var GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbzC1QGiSuBZ0yzvsQVd9St0NbwxOOTanOilNesWl8A7vC83vKEzevLAq04wLOOXs1TPYg/exec";
+var GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbxJCyRPMJ1ekIGfemMhrMJB2C18YgwgSnYxTsWwvkKQOEcXsrIsMpobK2BNFQdsYdV0wg/exec";
 var allOpinions = [];
 
 // ===============================
