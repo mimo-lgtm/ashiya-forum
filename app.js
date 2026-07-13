@@ -1,6 +1,17 @@
 // ===============================
 // グローバル変数
 // ===============================
+function escapeHtml(str) {
+    if (!str) return "";
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+
 var GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbzC1QGiSuBZ0yzvsQVd9St0NbwxOOTanOilNesWl8A7vC83vKEzevLAq04wLOOXs1TPYg/exec";
 var allOpinions = [];
 
