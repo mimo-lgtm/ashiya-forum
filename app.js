@@ -211,7 +211,7 @@ matched.forEach(post => {
 <div style="margin:6px 0; padding:10px 12px; border-left:3px solid ${borderColor}; background:#fff; border-radius:4px;">
   <div class="post-toggle" style="cursor:pointer; font-weight:600; color:#1e293b;">
     ${icon} ${escapeHtml(post.title)}
-
+  </div>
 
   <div class="post-content" style="display:none; padding:10px; margin-top:8px; background:#f8fafc; border-radius:6px; font-size:10pt; line-height:1.7;">
     <div style="color:#475569; white-space:pre-wrap;">${escapeHtml(post.summary)}</div>
