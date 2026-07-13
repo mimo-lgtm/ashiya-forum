@@ -201,80 +201,63 @@ function renderIdeaMap() {
     const container = document.getElementById("map-container");
     if (!container) return;
 
-    container.innerHTML = ""; // 初期化
+    container.innerHTML = "";
 
     Object.keys(CATEGORY_MASTER).forEach(bigId => {
         const bigName = CATEGORY_MASTER[bigId].name;
-
-        // 300字固定文
         const baseText = AI_BASE_SUMMARY[bigName] || "（固定文が設定されていません）";
 
-        // 大分類に属する投稿を抽出
         const posts = allOpinions.filter(o => {
             const oBig = (o.bigCatName || "").split("（")[0];
             const bigBase = bigName.split("（")[0];
             return oBig === bigBase;
         });
 
-        // 50%：元記事
         const originals = posts.filter(p => !p.status || p.status === "元記事");
-
-        // 50%：新統合
         const merged = posts.filter(p => p.status === "新統合");
 
-        const originalText = originals.map(p => `● ${p.title}\n${p.summary}`).join("\n\n");
-        const mergedText = merged.map(p => `★ ${p.title}\n${p.summary}`).join("\n\n");
+        const originalText = originals.map(p => "● " + p.title + "\n" + p.summary).join("\n\n");
+        const mergedText = merged.map(p => "★ " + p.title + "\n" + p.summary).join("\n\n");
 
-        const combinedText = `
-【元記事（50%）】
-${originalText || "該当する投稿がありません"}
+        const combinedText =
+            "【元記事（50%）】\n" +
+            (originalText || "該当する投稿がありません") +
+            "\n\n【新統合（50%）】\n" +
+            (mergedText || "該当する投稿がありません");
 
-【新統合（50%）】
-${mergedText || "該当する投稿がありません"}
-        `.trim();
+        const html =
+            '<h4 class="fw-bold mb-3">' + bigName + '</h4>' +
+            '<div class="row g-4">' +
+
+                '<div class="col-md-6">' +
+                    '<div class="p-3 bg-light border rounded h-100">' +
+                        '<h5 class="fw-bold mb-2">🌱 未来提案の原点（アイデアの地図）</h5>' +
+                        '<p class="small" style="white-space:pre-wrap;">' + baseText + '</p>' +
+                    '</div>' +
+                '</div>' +
+
+                '<div class="col-md-6">' +
+                    '<div class="p-3 bg-white border rounded h-100">' +
+                        '<h5 class="fw-bold mb-2">🤝 提案集約・共創アップデート案</h5>' +
+                        '<button class="btn btn-primary btn-sm mb-3 update-btn">🔄 アップデートを表示</button>' +
+                        '<div class="update-content d-none" style="white-space:pre-wrap;">' + combinedText + '</div>' +
+                    '</div>' +
+                '</div>' +
+
+            '</div>';
 
         const block = document.createElement("div");
         block.className = "mb-5";
-
-        block.innerHTML = `
-            <h4 class="fw-bold mb-3">${bigName}</h4>
-
-            <div class="row g-4">
-
-                <!-- 左：未来提案の原点 -->
-                <div class="col-md-6">
-                    <div class="p-3 bg-light border rounded h-100">
-                        <h5 class="fw-bold mb-2">🌱 未来提案の原点（アイデアの地図）</h5>
-                        <p class="small" style="white-space:pre-wrap;">${baseText}</p>
-                    </div>
-                </div>
-                <!-- 右：提案集約・共創アップデート案 -->
-                <div class="col-md-6">
-                    <div class="p-3 bg-white border rounded h-100">
-                        <h5 class="fw-bold mb-2">🤝 提案集約・共創アップデート案</h5>
-
-                        <button class="btn btn-primary btn-sm mb-3 update-btn">
-                            🔄 アップデートを表示
-                        </button>
-
-                        <div class="update-content d-none" style="white-space:pre-wrap;">
-                            ${combinedText}
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        `;
+        block.innerHTML = html;
 
         container.appendChild(block);
 
-        // ボタン動作
         const btn = block.querySelector(".update-btn");
         const content = block.querySelector(".update-content");
 
         btn.addEventListener("click", () => {
-            const isHidden = content.classList.contains("d-none");
-            if (isHidden) {
+            const hidden = content.classList.contains("d-none");
+            if (hidden) {
                 content.classList.remove("d-none");
                 btn.textContent = "❌ 閉じる";
             } else {
