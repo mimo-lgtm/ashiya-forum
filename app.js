@@ -219,3 +219,102 @@ function renderProposalTree(opinions) {
 
                 postsHtml += `
 <div style="margin:6px 0; padding:10px 12px; border-left:3px solid ${borderColor}; background:#fff; border-radius:4px;">
+  <div class="post-toggle" style="cursor:pointer; font-weight:600; color:#1e293b;">
+    ${icon} ${post.title}
+  </div>
+  <div class="post-content" style="display:none; padding:10px; margin-top:8px; background:#f8fafc; border-radius:6px; font-size:10pt; line-height:1.7;">
+    <div style="color:#475569; white-space:pre-wrap;">${post.summary}</div>
+    ${post.mergeTitle ? `<div class="merge-info" style="margin-top:6px; font-size:9pt; color:#64748b;">統合先：${post.mergeTitle}</div>` : ""}
+    ${post.mergeReason ? `<div style="margin-top:6px; font-size:9pt; color:#64748b;">統合理由：${post.mergeReason}</div>` : ""}
+    ${post.crossAnalysis ? `<div style="margin-top:6px; font-size:9pt; color:#475569;">クロス分析：${post.crossAnalysis}</div>` : ""}
+    ${post.layoutReason ? `<div style="margin-top:6px; font-size:9pt; color:#475569;">配置理由：${post.layoutReason}</div>` : ""}
+    ${post.authorId ? `<div style="margin-top:6px; font-size:9pt; color:#334155;">投稿者ID：${post.authorId}</div>` : ""}
+  </div>
+</div>
+`;
+            });
+
+            bigHtml += `
+<div style="margin-bottom:20px;">
+  <h5 style="font-weight:700; color:#1e293b;">${mid}（${matched.length}件）</h5>
+  ${postsHtml}
+</div>
+`;
+        });
+
+        container.innerHTML += `
+<div style="margin-bottom:40px;">
+  <h4 style="font-weight:800; color:#0f172a;">${big}（${bigCount}件）</h4>
+  ${bigHtml}
+</div>
+`;
+    });
+}
+
+// ===============================
+// フォームクリア
+// ===============================
+function clearForm() {
+    const ids = ["title", "summary", "content", "bigCatName", "midCatName", "author"];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+    });
+
+    const contentEl = document.getElementById("content");
+    if (contentEl) contentEl.value = "";
+
+    document.getElementById("aiAssistBox")?.classList.add("d-none");
+    document.getElementById("aiPlaceholder")?.classList.remove("d-none");
+}
+
+// ===============================
+// アイデアの地図（5分類×左右ボード）
+// ===============================
+function renderIdeaMap() {
+    const container = document.getElementById("map-container");
+    if (!container) return;
+
+    container.innerHTML = ""; // 初期化
+
+    Object.keys(CATEGORY_MASTER).forEach(bigId => {
+        const bigName = CATEGORY_MASTER[bigId].name;
+
+        // 300字固定文
+        const baseText = AI_BASE_SUMMARY[bigName] || "（固定文が設定されていません）";
+
+        // 大分類に属する投稿を抽出
+        const posts = allOpinions.filter(o => {
+            const oBig = (o.bigCatName || "").split("（")[0];
+            const bigBase = bigName.split("（")[0];
+            return oBig === bigBase;
+        });
+
+        // 50%：元記事
+        const originals = posts.filter(p => !p.status || p.status === "元記事");
+
+        // 50%：新統合
+        const merged = posts.filter(p => p.status === "新統合");
+
+        const originalText = originals.map(p => `● ${p.title}\n${p.summary}`).join("\n\n");
+        const mergedText = merged.map(p => `★ ${p.title}\n${p.summary}`).join("\n\n");
+
+        const combinedText = `
+【元記事（50%）】
+${originalText || "該当する投稿がありません"}
+
+【新統合（50%）】
+${mergedText || "該当する投稿がありません"}
+        `.trim();
+
+        const block = document.createElement("div");
+        block.className = "mb-5";
+
+        block.innerHTML = `
+            <h4 class="fw-bold mb-3">${bigName}</h4>
+
+            <div class="row g-4">
+
+                <!-- 左：未来提案の原点 -->
+                <div class="col-md-6">
+                    <div class="p-3
